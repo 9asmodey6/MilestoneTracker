@@ -1,0 +1,6 @@
+@MishaMilestones_HostAddress = http://localhost:5236
+
+GET {{MishaMilestones_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
