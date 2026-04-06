@@ -1,4 +1,4 @@
-# Misha Milestones Tracker
+# Milestone Tracker
 
 A personal Telegram Bot designed to track and store significant life events and achievements.
 
