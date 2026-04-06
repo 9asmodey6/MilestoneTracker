@@ -1,10 +1,10 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MishaMilestones.API", "MishaMilestones.API\MishaMilestones.API.csproj", "{66B335C0-1EBD-4765-A175-9E0C0EB53AB1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MilestoneTracker.API", "MilestoneTracker.API\MilestoneTracker.API.csproj", "{66B335C0-1EBD-4765-A175-9E0C0EB53AB1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MishaMilestones.Domain", "MishaMilestones.Domain\MishaMilestones.Domain.csproj", "{AD0D5DC4-020E-4054-8E73-F5F98A59D6EE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MilestoneTracker.Domain", "MilestoneTracker.Domain\MilestoneTracker.Domain.csproj", "{AD0D5DC4-020E-4054-8E73-F5F98A59D6EE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MishaMilestones.Infrastructure", "MishaMilestones.Infrastructure\MishaMilestones.Infrastructure.csproj", "{2929885A-6D93-4579-A292-E09542FE6AFA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MilestoneTracker.Infrastructure", "MilestoneTracker.Infrastructure\MilestoneTracker.Infrastructure.csproj", "{2929885A-6D93-4579-A292-E09542FE6AFA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
