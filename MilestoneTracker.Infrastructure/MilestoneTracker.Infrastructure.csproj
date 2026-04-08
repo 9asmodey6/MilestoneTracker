@@ -18,6 +18,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\MilestoneTracker.Application\MilestoneTracker.Application.csproj" />
       <ProjectReference Include="..\MilestoneTracker.Domain\MilestoneTracker.Domain.csproj" />
     </ItemGroup>
 

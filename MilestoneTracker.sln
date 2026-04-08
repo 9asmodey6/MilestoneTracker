@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MilestoneTracker.Domain", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MilestoneTracker.Infrastructure", "MilestoneTracker.Infrastructure\MilestoneTracker.Infrastructure.csproj", "{2929885A-6D93-4579-A292-E09542FE6AFA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MilestoneTracker.Application", "MilestoneTracker.Application\MilestoneTracker.Application.csproj", "{8D2BD759-C9F3-4DDC-88C3-B8AC8E6F9264}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{2929885A-6D93-4579-A292-E09542FE6AFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2929885A-6D93-4579-A292-E09542FE6AFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2929885A-6D93-4579-A292-E09542FE6AFA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D2BD759-C9F3-4DDC-88C3-B8AC8E6F9264}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D2BD759-C9F3-4DDC-88C3-B8AC8E6F9264}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D2BD759-C9F3-4DDC-88C3-B8AC8E6F9264}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D2BD759-C9F3-4DDC-88C3-B8AC8E6F9264}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
