@@ -1,8 +1,15 @@
 ﻿namespace MilestoneTracker.Infrastructure.Bootstrap;
 
+using Microsoft.EntityFrameworkCore;
+using Serilog;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Options;
+using Persistence;
+using Serilog.Events;
+using Serilog.Sinks.SystemConsole.Themes;
+using Services;
 using Telegram.Bot;
 
 public static class DependencyInjection
@@ -11,6 +18,9 @@ public static class DependencyInjection
     {
         services.Configure<TelegramOptions>(
             configuration.GetSection(TelegramOptions.SectionName));
+
+        services.Configure<DatabaseOptions>(
+            configuration.GetSection(DatabaseOptions.SectionName));
 
         return services;
     }
@@ -27,8 +37,65 @@ public static class DependencyInjection
         }
 
         services.AddSingleton<ITelegramBotClient>(provider =>
-            new TelegramBotClient(options!.BotToken));
+            new TelegramBotClient(options.BotToken));
 
         return services;
+    }
+
+    public static IServiceCollection AddDatabaseServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        var dbOptions = configuration.GetSection(DatabaseOptions.SectionName).Get<DatabaseOptions>();
+
+        if (string.IsNullOrEmpty(dbOptions?.ConnectionString))
+        {
+            throw new InvalidOperationException("Connection String is missing in configuration!");
+        }
+
+        services.AddDbContext<AppDbContext>(options =>
+            options.UseNpgsql(dbOptions.ConnectionString)
+                .UseSnakeCaseNamingConvention());
+
+        return services;
+    }
+
+    public static IServiceCollection AddBasicServices(this IServiceCollection services)
+    {
+        services.AddScoped<UpdateHandler>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddSerilogLogging(this IServiceCollection services)
+    {
+        return services.AddSerilog((serviceProvider, loggerConfiguration) =>
+        {
+            var env = serviceProvider.GetRequiredService<IHostEnvironment>();
+
+            loggerConfiguration
+                .MinimumLevel.Information()
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+                .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
+                .MinimumLevel.Override("System", LogEventLevel.Warning)
+                .Filter.ByExcluding(logEvent =>
+                {
+                    if (logEvent.Properties.TryGetValue("RequestPath", out var pathValue))
+                    {
+                        var path = pathValue.ToString().ToLower();
+                        return path.Contains("/scalar") ||
+                               path.Contains("/favicon") ||
+                               path.EndsWith(".js\"") ||
+                               path.EndsWith(".css\"");
+                    }
+
+                    return false;
+                })
+                .Enrich.FromLogContext()
+                .Enrich.WithProperty("Application", "MilestoneTracker.API")
+                .Enrich.WithProperty("Environment", env.EnvironmentName)
+                .WriteTo.Console(
+                    outputTemplate:
+                    "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} <{SourceContext}>{NewLine}{Exception}",
+                    theme: AnsiConsoleTheme.Grayscale);
+        });
     }
 }
