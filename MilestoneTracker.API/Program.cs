@@ -1,3 +1,5 @@
+using MilestoneTracker.Application;
+using MilestoneTracker.Infrastructure;
 using MilestoneTracker.Infrastructure.Bootstrap;
 using MilestoneTracker.Infrastructure.Options;
 using Serilog;
@@ -11,8 +13,8 @@ builder.Services.AddControllers();
 
 builder.Services.ApplyConfigurations(builder.Configuration)
     .AddTelegramBot(builder.Configuration)
-    .AddDatabaseServices(builder.Configuration)
-    .AddBasicServices()
+    .AddInfractructure(builder.Configuration)
+    .AddApplication()
     .AddSerilogLogging();
 
 

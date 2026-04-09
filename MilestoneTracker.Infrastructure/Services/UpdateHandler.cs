@@ -1,40 +1,45 @@
 ﻿namespace MilestoneTracker.Infrastructure.Services;
 
-using Telegram.Bot;
+using Application.Common.Bot.Comands.Start;
+using Application.Common.Interfaces;
+using MediatR;
+using Microsoft.Extensions.Logging;
+using Models;
 using Telegram.Bot.Types;
 
-public class UpdateHandler
+public class UpdateHandler(
+    IMediator mediator,
+    ILogger<UpdateHandler> logger)
+    //IUserStateManager stateManager)
 {
-    private readonly ITelegramBotClient _botClient;
-
-    public UpdateHandler(ITelegramBotClient botClient)
-    {
-        _botClient = botClient;
-    }
-
     public async Task HandleUpdateAsync(Update update, CancellationToken ct)
     {
-        try
+        var context = BotContext.FromUpdate(update);
+        if (context == null)
         {
-            if (update.Message is not { Text: { } messageText } message) 
-            {
-                Console.WriteLine($"⚠️ Update не содержит текстового сообщения. Type: {update.Type}");
-                return;
-            }
-
-            Console.WriteLine($"📩 Получено: '{messageText}' от ChatId: {message.Chat.Id}");
-
-            await _botClient.SendMessage(
-                chatId: message.Chat.Id,
-                text: $"Влад, вебхук принял: {messageText} 🫡",
-                cancellationToken: ct);
-            
-            Console.WriteLine("✅ Ответ отправлен!");
+            return;
         }
-        catch (Exception ex)
+
+        logger.LogInformation("Processing update for ChatId: {ChatId}", context.ChatId);
+
+        await HandleCommand(context, ct);
+    }
+
+    private async Task HandleCommand(BotContext context, CancellationToken ct)
+    {
+        switch (context.Text)
         {
-            Console.WriteLine($"❌ Ошибка в HandleUpdateAsync: {ex.Message}");
-            Console.WriteLine($"   Stack: {ex.StackTrace}");
+            case "/start":
+                await mediator.Send(new StartCommand(
+                    context.ChatId, 
+                    context.FirstName, 
+                    context.Username), ct);
+                break;
+
+            default:
+                throw new InvalidOperationException();
+                // await HandleUnknownCommand(context.ChatId, ct);
+                break;
         }
     }
 }

@@ -20,5 +20,5 @@ public static class DependencyInjection
             Assembly.GetExecutingAssembly());
 
         return services;
-    }
+    }   
 }

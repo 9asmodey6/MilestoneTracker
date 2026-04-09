@@ -6,10 +6,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Options;
-using Persistence;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
-using Services;
 using Telegram.Bot;
 
 public static class DependencyInjection
@@ -38,29 +36,6 @@ public static class DependencyInjection
 
         services.AddSingleton<ITelegramBotClient>(provider =>
             new TelegramBotClient(options.BotToken));
-
-        return services;
-    }
-
-    public static IServiceCollection AddDatabaseServices(this IServiceCollection services, IConfiguration configuration)
-    {
-        var dbOptions = configuration.GetSection(DatabaseOptions.SectionName).Get<DatabaseOptions>();
-
-        if (string.IsNullOrEmpty(dbOptions?.ConnectionString))
-        {
-            throw new InvalidOperationException("Connection String is missing in configuration!");
-        }
-
-        services.AddDbContext<AppDbContext>(options =>
-            options.UseNpgsql(dbOptions.ConnectionString)
-                .UseSnakeCaseNamingConvention());
-
-        return services;
-    }
-
-    public static IServiceCollection AddBasicServices(this IServiceCollection services)
-    {
-        services.AddScoped<UpdateHandler>();
 
         return services;
     }
