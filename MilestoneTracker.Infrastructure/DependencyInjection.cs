@@ -8,6 +8,7 @@ using Options;
 using Persistence;
 using Persistence.Repositories;
 using Services;
+using Services.BackgroundServices;
 
 public static class DependencyInjection
 {
@@ -28,6 +29,10 @@ public static class DependencyInjection
 
         services.AddScoped<ITelegramMessageService, TelegramMessageService>(); 
         services.AddScoped<IParentRepository, ParentRepository>();
+        
+        services.AddSingleton<UpdateChannelQueue>();
+        services.AddHostedService<UpdateWorker>();
+        
         return services;
     }
 }

@@ -23,7 +23,6 @@ public class StartCommandHandler(
         }
         else
         {
-            // Новый пользователь - создаём Parent
             var newParent = new Parent
             {
                 ChatId = request.ChatId,

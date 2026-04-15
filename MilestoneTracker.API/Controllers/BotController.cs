@@ -4,37 +4,32 @@ using Microsoft.AspNetCore.Mvc;
 using Telegram.Bot.Types;
 using Infrastructure.Services;
 using System.Text.Json;
-using Infrastructure.Services;
+
 
 [ApiController]
 [Route("api/bot")]
-public class WebhookController : ControllerBase
+public class WebhookController(ILogger<WebhookController> logger) : ControllerBase
 {
-    private readonly ILogger<WebhookController> _logger;
-    private readonly UpdateHandler _updateHandler;
-
-    public WebhookController(ILogger<WebhookController> logger, UpdateHandler updateHandler)
-    {
-        _logger = logger;
-        _updateHandler = updateHandler;
-    }
-
     [HttpPost]
-    public async Task<IActionResult> Post([FromBody] Update update, CancellationToken ct)
+    public async Task<IActionResult> Post(
+        [FromBody] Update update,
+        [FromServices] UpdateChannelQueue queue,
+        CancellationToken ct)
     {
-        _logger.LogInformation("---> [WEBHOOK] Получено обновление ID: {UpdateId}, Тип: {UpdateType}", 
-            update.Id, update.Type);
+        logger.LogInformation(
+            "---> [WEBHOOK] Update ID: {UpdateId}, Type: {UpdateType}",
+            update.Id,
+            update.Type);
 
         try
         {
-            await _updateHandler.HandleUpdateAsync(update, ct);
+            await queue.PushUpdateAsync(update, ct);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, " Ошибка при обработке Update {UpdateId}", update.Id);
+            logger.LogError(ex, "Error while pushing Update {UpdateId} to the queue", update.Id);
         }
-        
-        
+
         return Ok();
     }
 
