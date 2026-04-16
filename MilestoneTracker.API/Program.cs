@@ -1,6 +1,5 @@
 using MilestoneTracker.Application;
 using MilestoneTracker.Infrastructure;
-using MilestoneTracker.Infrastructure.Bootstrap;
 using MilestoneTracker.Infrastructure.Options;
 using Serilog;
 using Telegram.Bot;

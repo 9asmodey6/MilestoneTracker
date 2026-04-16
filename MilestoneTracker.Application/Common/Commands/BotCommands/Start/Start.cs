@@ -1,4 +1,4 @@
-﻿namespace MilestoneTracker.Application.Common.Bot.Comands.Start;
+﻿namespace MilestoneTracker.Application.Common.Commands.Bot.Start;
 
 using MediatR;
 

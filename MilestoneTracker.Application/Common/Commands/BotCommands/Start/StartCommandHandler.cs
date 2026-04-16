@@ -1,10 +1,10 @@
-﻿namespace MilestoneTracker.Application.Common.Bot.Comands.Start;
+﻿namespace MilestoneTracker.Application.Common.Commands.Bot.Start;
 
-using Domain.Entities;
-using Interfaces;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using Telegram.Bot.Types.ReplyMarkups;
+using MilestoneTracker.Application.Common.Commands.Bot.Keyboards;
+using MilestoneTracker.Application.Common.Interfaces;
+using MilestoneTracker.Domain.Entities;
 
 public class StartCommandHandler(
     IParentRepository parentRepository,
@@ -34,7 +34,7 @@ public class StartCommandHandler(
                 logger.LogInformation("Failed to create new Parent with ChatId: {ChatId}", request.ChatId);
                 throw new Exception($"Failed to create parent with id: {newParent.Id}");
             }
-            
+
             logger.LogInformation("Created new Parent with ChatId: {ChatId}", request.ChatId);
 
             await SendWelcomeMessage(request.ChatId, newParent.Name, ct);
@@ -42,7 +42,7 @@ public class StartCommandHandler(
 
         return Unit.Value;
     }
-    
+
     private async Task SendWelcomeMessage(long chatId, string name, CancellationToken ct)
     {
         var welcomeText = $"""
@@ -57,19 +57,10 @@ public class StartCommandHandler(
 
                            Для начала добавь своего ребёнка:
                            """;
- 
-        var keyboard = new ReplyKeyboardMarkup(new[]
-        {
-            new[] { new KeyboardButton("➕ Добавить ребёнка") },
-            new[] { new KeyboardButton("📋 Помощь") }
-        })
-        {
-            ResizeKeyboard = true
-        };
- 
-        await messageService.SendTextMessageAsync(chatId, welcomeText, keyboard, ct);
+
+        await messageService.SendTextMessageAsync(chatId, welcomeText, BotKeyboards.WelcomeKeyboard, ct);
     }
- 
+
     private async Task SendWelcomeBackMessage(long chatId, Parent parent, CancellationToken ct)
     {
         var childrenCount = parent.Children.Count;
@@ -80,24 +71,10 @@ public class StartCommandHandler(
 
                                Что будем делать?
                                """;
- 
-        var keyboard = new ReplyKeyboardMarkup(new[]
-        {
-            new[] { new KeyboardButton("➕ Добавить воспоминание") },
-            new[] 
-            { 
-                new KeyboardButton("👶 Мои дети"), 
-                new KeyboardButton("📜 История") 
-            },
-            new[] { new KeyboardButton("📋 Помощь") }
-        })
-        {
-            ResizeKeyboard = true
-        };
- 
-        await messageService.SendTextMessageAsync(chatId, welcomeBackText, keyboard, ct);
+
+        await messageService.SendTextMessageAsync(chatId, welcomeBackText, BotKeyboards.MainMenuKeyboard, ct);
     }
- 
+
     private static string GetChildrenWord(int count)
     {
         return count switch

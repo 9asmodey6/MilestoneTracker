@@ -9,6 +9,10 @@ public record BotContext
     public int? MessageId { get; init; }
     public string? Text { get; init; }
     public string? CallbackData { get; init; }
+    public string? CallbackQueryId { get; init; }
+
+    public bool IsCallback => !string.IsNullOrEmpty(CallbackQueryId);
+
     public bool HasPhoto { get; init; }
     public string? PhotoFileId { get; init; }
     public bool HasVideo { get; init; }
@@ -30,7 +34,8 @@ public record BotContext
                 HasVideo = update.Message.Video != null,
                 VideoFileId = update.Message.Video?.FileId,
                 Username = update.Message.From?.Username,
-                FirstName = update.Message.From?.FirstName
+                FirstName = update.Message.From?.FirstName,
+                CallbackQueryId = null
             };
         }
 
@@ -41,8 +46,10 @@ public record BotContext
                 ChatId = update.CallbackQuery.Message!.Chat.Id,
                 MessageId = update.CallbackQuery.Message.MessageId,
                 CallbackData = update.CallbackQuery.Data,
+                CallbackQueryId = update.CallbackQuery.Id,
                 Username = update.CallbackQuery.From.Username,
-                FirstName = update.CallbackQuery.From.FirstName
+                FirstName = update.CallbackQuery.From.FirstName,
+                Text = update.CallbackQuery.Data
             };
         }
 

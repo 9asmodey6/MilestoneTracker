@@ -1,15 +1,26 @@
 ﻿namespace MilestoneTracker.Infrastructure.Services;
 
-using Application.Common.Bot.Comands.Start;
+using Application.Common.Commands.Bot.Start;
+using Application.Common.Commands.State;
+using Application.Common.Constants;
+using Application.Common.Interfaces;
+using Domain.Entities;
+using Domain.Enums;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Models;
+using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.CalendarKit;
+using Telegram.CalendarKit.Models.Enums;
 
 public class UpdateHandler(
     IMediator mediator,
-    ILogger<UpdateHandler> logger)
-    //IUserStateManager stateManager) 
+    ILogger<UpdateHandler> logger,
+    IUserStateService stateService,
+    UserFlowHandlerFactory handlerFactory,
+    ITelegramBotClient botClient,
+    CalendarBuilder calendarBuilder)
 {
     public async Task HandleUpdateAsync(Update update, CancellationToken ct)
     {
@@ -19,20 +30,76 @@ public class UpdateHandler(
             logger.LogError("Failed to parse BotContext from Update {UpdateId}", update.Id);
             return;
         }
-
+        
         logger.LogInformation("Processing update for ChatId: {ChatId}", context.ChatId);
+        
+        if (context.IsCallback)
+        {
+            await botClient.AnswerCallbackQuery(context.CallbackQueryId!, cancellationToken: ct);
+            await HandleCallbackQueryAsync(context, ct); // Передаем context!
+            return;
+        }
+        if (context.Text?.StartsWith('/') ?? false)
+        {
+            await HandleCommandAsync(context, ct);
+            return;
+        }
 
-        await HandleCommand(context, ct);
+        var state = await stateService.GetAsync(context.ChatId, ct);
+
+        if (IsMenuButton(context.Text))
+        {
+            await HandleMenuButtonAsync(context, state, ct);
+            return;
+        }
+
+        if (state.State != UserStateType.Idle)
+        {
+            await HandleStatefulInteractionAsync(context, state, ct);
+            return;
+        }
+
+        logger.LogWarning("Unhandled input from {ChatId}: {Text}", context.ChatId, context.Text);
     }
 
-    private async Task HandleCommand(BotContext context, CancellationToken ct)
+    private async Task HandleCallbackQueryAsync(
+        BotContext context,
+        CancellationToken ct)
+    {
+        var state = await stateService.GetAsync(context.ChatId, ct);
+        var data = context.Text;
+
+        if (string.IsNullOrEmpty(data))
+        {
+            logger.LogWarning("Unhandled callback query from {ChatId}: {Data}", context.ChatId, data);
+            return;
+        }
+
+        if (data.Contains(UiConstants.CallbackQueries.Next)
+            || data.Contains(UiConstants.CallbackQueries.Previous))
+        {
+            var updatedMarkup = await calendarBuilder.HandleNavigation(data, CalendarViewType.Default);
+            await botClient.EditMessageReplyMarkup(
+                chatId: context.ChatId,
+                messageId: context.MessageId!.Value,
+                replyMarkup: updatedMarkup,
+                cancellationToken: ct);
+
+            return;
+        }
+
+        var handler = handlerFactory.GetHandler(state.State);
+        await handler.HandleAsync(context, state, ct);
+    }
+
+    private async Task HandleCommandAsync(BotContext context, CancellationToken ct)
     {
         switch (context.Text)
         {
             case "/start":
                 await mediator.Send(new StartCommand(
-                    context.ChatId, 
-                    context.FirstName, 
+                    context.ChatId,
+                    context.FirstName,
                     context.Username), ct);
                 break;
 
@@ -42,4 +109,32 @@ public class UpdateHandler(
                 break;
         }
     }
+
+    private async Task HandleStatefulInteractionAsync(BotContext context, UserState state, CancellationToken ct)
+    {
+        var handler = handlerFactory.GetHandler(state.State);
+        await handler.HandleAsync(context, state, ct);
+    }
+
+    private async Task HandleMenuButtonAsync(
+        BotContext context,
+        UserState state,
+        CancellationToken ct)
+    {
+        switch (context.Text)
+        {
+            case UiConstants.ReplyButtons.AddChild:
+                var handler = handlerFactory.GetHandler(UserStateType.AddChildStarted);
+                await handler.HandleAsync(context, state, ct);
+                break;
+        }
+    }
+
+    private bool IsMenuButton(string? text) => text switch
+    {
+        UiConstants.ReplyButtons.AddChild => true,
+        UiConstants.ReplyButtons.AddMilestone => true,
+        UiConstants.ReplyButtons.Help => true,
+        _ => false
+    };
 }
