@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MilestoneTracker.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260408122441_InitialCreate")]
+    [Migration("20260417073643_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -20,29 +20,10 @@ namespace MilestoneTracker.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.25")
+                .HasAnnotation("ProductVersion", "8.0.26")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("ChildParent", b =>
-                {
-                    b.Property<int>("ChildrenId")
-                        .HasColumnType("integer")
-                        .HasColumnName("children_id");
-
-                    b.Property<int>("ParentsId")
-                        .HasColumnType("integer")
-                        .HasColumnName("parents_id");
-
-                    b.HasKey("ChildrenId", "ParentsId")
-                        .HasName("pk_parent_children");
-
-                    b.HasIndex("ParentsId")
-                        .HasDatabaseName("ix_parent_children_parents_id");
-
-                    b.ToTable("parent_children", (string)null);
-                });
 
             modelBuilder.Entity("MilestoneTracker.Domain.Entities.Child", b =>
                 {
@@ -67,6 +48,10 @@ namespace MilestoneTracker.Infrastructure.Migrations
                         .HasColumnType("character varying(100)")
                         .HasColumnName("name");
 
+                    b.Property<int>("ParentId")
+                        .HasColumnType("integer")
+                        .HasColumnName("parent_id");
+
                     b.Property<string>("PhotoFileId")
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
@@ -74,6 +59,9 @@ namespace MilestoneTracker.Infrastructure.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_children");
+
+                    b.HasIndex("ParentId")
+                        .HasDatabaseName("ix_children_parent_id");
 
                     b.ToTable("children", (string)null);
                 });
@@ -238,30 +226,25 @@ namespace MilestoneTracker.Infrastructure.Migrations
                         .HasColumnName("updated_at");
 
                     b.HasKey("Id")
-                        .HasName("pk_user_state");
+                        .HasName("pk_user_states");
 
                     b.HasIndex("ChatId")
                         .IsUnique()
-                        .HasDatabaseName("ix_user_state_chat_id");
+                        .HasDatabaseName("ix_user_states_chat_id");
 
-                    b.ToTable("user_state", (string)null);
+                    b.ToTable("user_states", (string)null);
                 });
 
-            modelBuilder.Entity("ChildParent", b =>
+            modelBuilder.Entity("MilestoneTracker.Domain.Entities.Child", b =>
                 {
-                    b.HasOne("MilestoneTracker.Domain.Entities.Child", null)
-                        .WithMany()
-                        .HasForeignKey("ChildrenId")
+                    b.HasOne("MilestoneTracker.Domain.Entities.Parent", "Parent")
+                        .WithMany("Children")
+                        .HasForeignKey("ParentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_parent_children_children_children_id");
+                        .HasConstraintName("fk_children_parents_parent_id");
 
-                    b.HasOne("MilestoneTracker.Domain.Entities.Parent", null)
-                        .WithMany()
-                        .HasForeignKey("ParentsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_parent_children_parents_parents_id");
+                    b.Navigation("Parent");
                 });
 
             modelBuilder.Entity("MilestoneTracker.Domain.Entities.Milestones.Milestone", b =>
@@ -303,6 +286,11 @@ namespace MilestoneTracker.Infrastructure.Migrations
             modelBuilder.Entity("MilestoneTracker.Domain.Entities.Milestones.Milestone", b =>
                 {
                     b.Navigation("MediaFiles");
+                });
+
+            modelBuilder.Entity("MilestoneTracker.Domain.Entities.Parent", b =>
+                {
+                    b.Navigation("Children");
                 });
 #pragma warning restore 612, 618
         }

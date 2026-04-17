@@ -13,22 +13,6 @@ namespace MilestoneTracker.Infrastructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "children",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    birth_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    photo_file_id = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
-                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_children", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "parents",
                 columns: table => new
                 {
@@ -43,7 +27,7 @@ namespace MilestoneTracker.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "user_state",
+                name: "user_states",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
@@ -56,7 +40,30 @@ namespace MilestoneTracker.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_user_state", x => x.id);
+                    table.PrimaryKey("pk_user_states", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "children",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    birth_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    photo_file_id = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    parent_id = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_children", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_children_parents_parent_id",
+                        column: x => x.parent_id,
+                        principalTable: "parents",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -92,30 +99,6 @@ namespace MilestoneTracker.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "parent_children",
-                columns: table => new
-                {
-                    children_id = table.Column<int>(type: "integer", nullable: false),
-                    parents_id = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_parent_children", x => new { x.children_id, x.parents_id });
-                    table.ForeignKey(
-                        name: "fk_parent_children_children_children_id",
-                        column: x => x.children_id,
-                        principalTable: "children",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "fk_parent_children_parents_parents_id",
-                        column: x => x.parents_id,
-                        principalTable: "parents",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "milestone_media",
                 columns: table => new
                 {
@@ -136,6 +119,11 @@ namespace MilestoneTracker.Infrastructure.Migrations
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "ix_children_parent_id",
+                table: "children",
+                column: "parent_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_milestone_media_milestone_id",
@@ -163,19 +151,14 @@ namespace MilestoneTracker.Infrastructure.Migrations
                 column: "occurred_at");
 
             migrationBuilder.CreateIndex(
-                name: "ix_parent_children_parents_id",
-                table: "parent_children",
-                column: "parents_id");
-
-            migrationBuilder.CreateIndex(
                 name: "ix_parents_chat_id",
                 table: "parents",
                 column: "chat_id",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "ix_user_state_chat_id",
-                table: "user_state",
+                name: "ix_user_states_chat_id",
+                table: "user_states",
                 column: "chat_id",
                 unique: true);
         }
@@ -187,10 +170,7 @@ namespace MilestoneTracker.Infrastructure.Migrations
                 name: "milestone_media");
 
             migrationBuilder.DropTable(
-                name: "parent_children");
-
-            migrationBuilder.DropTable(
-                name: "user_state");
+                name: "user_states");
 
             migrationBuilder.DropTable(
                 name: "milestones");

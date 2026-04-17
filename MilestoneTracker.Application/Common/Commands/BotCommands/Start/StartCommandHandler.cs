@@ -2,13 +2,14 @@
 
 using MediatR;
 using Microsoft.Extensions.Logging;
-using MilestoneTracker.Application.Common.Commands.Bot.Keyboards;
 using MilestoneTracker.Application.Common.Interfaces;
 using MilestoneTracker.Domain.Entities;
+using Shared.Bot.Keyboards;
 
 public class StartCommandHandler(
     IParentRepository parentRepository,
     ITelegramMessageService messageService,
+    IUserStateService userStateService,
     ILogger<StartCommandHandler> logger) : IRequestHandler<StartCommand, Unit>
 {
     public async Task<Unit> Handle(StartCommand request, CancellationToken ct)
@@ -39,6 +40,10 @@ public class StartCommandHandler(
 
             await SendWelcomeMessage(request.ChatId, newParent.Name, ct);
         }
+        
+        await userStateService.ResetAsync(request.ChatId, ct); 
+    
+        logger.LogInformation("Initialized Idle state for chat {ChatId}", request.ChatId);
 
         return Unit.Value;
     }

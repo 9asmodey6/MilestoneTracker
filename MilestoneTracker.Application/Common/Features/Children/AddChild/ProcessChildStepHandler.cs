@@ -6,9 +6,12 @@ using Domain.Entities;
 using Domain.Enums;
 using Infrastructure.Models;
 using Interfaces;
+using MediatR;
 using Microsoft.Extensions.Logging;
 using Shared.Abstractions.Interfaces;
+using Shared.Bot.Keyboards;
 using Shared.Interfaces;
+using Telegram.Bot;
 using Telegram.Bot.Types.ReplyMarkups;
 using Telegram.CalendarKit;
 using Telegram.CalendarKit.Models.Enums;
@@ -18,6 +21,9 @@ public class ProcessChildStepHandler(
     IUserStateService userStateService,
     ITelegramCalendarParser calendarParser,
     CalendarBuilder calendarBuilder,
+    IMediator mediator,
+    IParentRepository parentRepository,
+    ITelegramBotClient botClient,
     ILogger<ProcessChildStepHandler> logger) : IUserFlowHandler
 {
     public bool CanHandle(UserStateType userState) =>
@@ -38,10 +44,10 @@ public class ProcessChildStepHandler(
                 await HandleNameStep(context, data, ct);
                 break;
             case UserStateType.AddChildEnteringBirthdate:
-                await HandleAgeStep(userState, data, ct);
+                await HandleBirthdayStep(context, data, ct);
                 break;
             case UserStateType.AddChildUploadingPhoto:
-                await HandlePhotoStep(userState, data, ct);
+                await HandlePhotoStep(context, data, ct);
                 break;
         }
     }
@@ -70,11 +76,11 @@ public class ProcessChildStepHandler(
             context.ChatId);
 
         var updatedData = data with { Name = context.Text };
-        
+
         var calendarButtons = calendarBuilder.GenerateCalendarButtons(
-            DateTime.Now.Year, 
-            DateTime.Now.Month, 
-            CalendarViewType.Default, 
+            DateTime.Now.Year,
+            DateTime.Now.Month,
+            CalendarViewType.Default,
             "ru");
 
         await messageService.SendTextMessageAsync(
@@ -85,8 +91,106 @@ public class ProcessChildStepHandler(
 
         await userStateService.UpdateAsync<CreateChildData>(
             context.ChatId,
-            UserStateType.AddChildEnteringName,
+            UserStateType.AddChildEnteringBirthdate,
             data,
             ct);
+    }
+
+    private async Task HandleBirthdayStep(BotContext context, CreateChildData data, CancellationToken ct)
+    {
+        logger.LogInformation("Started child adding step for chat {ChatId}, waiting for photo entering",
+            context.ChatId);
+
+        var birthDate = calendarParser.ParseDate(context.Text!);
+
+        if (birthDate == null)
+        {
+            await messageService.SendTextMessageAsync(
+                context.ChatId,
+                "Пожалуйста, выбери дату на календаре 📅",
+                ct: ct);
+            return;
+        }
+
+        var updatedData = data with
+        {
+            BirthDate = birthDate
+        };
+
+        await messageService.SendTextMessageAsync(
+            context.ChatId,
+            $"Отлично! Дата рождения: {birthDate.Value:dd.MM.yyyy}\n\nТеперь отправь фото малыша (или нажми кнопку ниже, чтобы пропустить):",
+            replyMarkup: BotKeyboards.SkipPhotoKeyboard(),
+            ct: ct);
+
+        await userStateService.UpdateAsync<CreateChildData>(
+            context.ChatId,
+            UserStateType.AddChildUploadingPhoto,
+            data,
+            ct);
+    }
+
+    private async Task HandlePhotoStep(BotContext context, CreateChildData data, CancellationToken ct)
+    {
+        logger.LogInformation("Started child adding step for chat {ChatId}, waiting for photo",
+            context.ChatId);
+
+        bool isSkipped = context.IsCallback 
+                         && context.CallbackData == UiConstants.CallbackQueries.SkipPhoto;
+        
+        if (!isSkipped && !context.HasPhoto)
+        {
+            await messageService.SendTextMessageAsync(
+                context.ChatId,
+                "Пожалуйста, отправь фото или нажми на кнопку «Пропустить»! 👇",
+                BotKeyboards.SkipPhotoKeyboard(),
+                ct: ct);
+            return;
+        }
+        
+        if (string.IsNullOrEmpty(data.Name) || data.BirthDate == null)
+        {
+            logger.LogError("Invalid data when creating child. Name: {Name}, BirthDate: {Date}", 
+                data.Name, data.BirthDate);
+        
+            await messageService.SendTextMessageAsync(
+                context.ChatId,
+                "❌ Ошибка! Данные потеряны. Начни заново с кнопки '➕ Добавить ребёнка'",
+                ct: ct);
+        
+            await userStateService.ResetAsync(context.ChatId, ct);
+            return;
+        }
+        
+        var parent = await parentRepository.GetAsync(context.ChatId, ct);
+        if (parent == null)
+        {
+            logger.LogError("Parent not found for ChatId: {ChatId}", context.ChatId);
+            return;
+        }
+        var photoId = isSkipped ? null : context.PhotoFileId;
+        
+        await mediator.Send(new CreateChildCommand(
+            parent.Id,
+            data.Name,
+            data.BirthDate!.Value,
+            photoId), ct);
+        
+        if (context.IsCallback)
+        {
+            await botClient.EditMessageReplyMarkup(
+                context.ChatId,
+                context.MessageId!.Value,
+                replyMarkup: null,
+                cancellationToken: ct);
+        }
+    
+        await messageService.SendTextMessageAsync(
+            context.ChatId,
+            "🎉 Ребёнок успешно добавлен!",
+            BotKeyboards.MainMenuKeyboard,
+            ct);
+        
+        await userStateService.ResetAsync(context.ChatId, ct);
     }
 }

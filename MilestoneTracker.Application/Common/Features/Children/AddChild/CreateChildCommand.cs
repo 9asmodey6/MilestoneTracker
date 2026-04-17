@@ -1,6 +1,8 @@
 ﻿namespace MilestoneTracker.Application.Common.Features.Children.AddChild;
+using MediatR;
 
-public class CreateChildCommand
-{
-    
-}
+public record CreateChildCommand(
+    int ParentId,
+    string Name,
+    DateTime Date,
+    string? PhotoId) : IRequest<int>;

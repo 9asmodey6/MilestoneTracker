@@ -20,5 +20,9 @@ public class ChildConfiguration : IEntityTypeConfiguration<Child>
         builder.HasMany(c => c.Milestones)
             .WithOne(m => m.Child)
             .HasForeignKey(m => m.ChildId);
+        
+        builder.HasOne(c => c.Parent)
+            .WithMany(p => p.Children)
+            .HasForeignKey(c => c.ParentId);
     }
 }

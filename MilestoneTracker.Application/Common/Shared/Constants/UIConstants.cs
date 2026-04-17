@@ -23,6 +23,7 @@ public static class UiConstants
         public const string Date = "date";
         public const string Next = "next";
         public const string Previous = "prev";
+        public const string SkipPhoto = "📋 ";
         
     }
 }

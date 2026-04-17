@@ -1,4 +1,4 @@
-﻿namespace MilestoneTracker.Application.Common.Commands.Bot.Keyboards;
+﻿namespace MilestoneTracker.Application.Common.Shared.Bot.Keyboards;
 
 using MilestoneTracker.Application.Common.Constants;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -18,4 +18,14 @@ public static class BotKeyboards
         ],
         [new KeyboardButton(UiConstants.ReplyButtons.Help)]
     ]) { ResizeKeyboard = true };
+    
+    public static InlineKeyboardMarkup SkipPhotoKeyboard()
+    {
+        return new(InlineKeyboardButton
+            .WithCallbackData(
+                "Пропустить фото ⏭️",
+                UiConstants.CallbackQueries.SkipPhoto));
+    }
+       
+       
 }

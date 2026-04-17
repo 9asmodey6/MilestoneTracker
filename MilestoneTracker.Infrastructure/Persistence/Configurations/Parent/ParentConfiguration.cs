@@ -21,7 +21,8 @@ public class ParentConfiguration : IEntityTypeConfiguration<Parent>
             .IsUnique();
 
         builder.HasMany(p => p.Children)
-            .WithMany(c => c.Parents)
-            .UsingEntity(j => j.ToTable("parent_children"));
+            .WithOne(c => c.Parent)
+            .HasForeignKey(c => c.ParentId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

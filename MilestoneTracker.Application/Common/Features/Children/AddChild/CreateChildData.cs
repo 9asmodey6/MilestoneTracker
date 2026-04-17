@@ -2,5 +2,5 @@
 
 public record CreateChildData(
     string? Name = null, 
-    int? Age = null, 
+    DateTime? BirthDate = null, 
     string? PhotoId = null);

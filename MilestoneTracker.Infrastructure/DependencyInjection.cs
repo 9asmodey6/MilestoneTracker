@@ -35,26 +35,24 @@ public static class DependencyInjection
             options.UseNpgsql(dbOptions.ConnectionString)
                 .UseSnakeCaseNamingConvention());
         
-        services.AddScoped<UpdateHandler>();
-
-        services.AddScoped<ITelegramMessageService, TelegramMessageService>(); 
-        services.AddScoped<IParentRepository, ParentRepository>();
+        services.AddScoped<IAppDbContext>(sp => sp.GetRequiredService<AppDbContext>());
         
+        services.AddScoped<UpdateHandler>();
         services.AddSingleton<UpdateChannelQueue>();
         services.AddHostedService<UpdateWorker>();
+
+        services.AddScoped<ITelegramMessageService, TelegramMessageService>(); 
         
         services.AddScoped<IParentRepository, ParentRepository>();
         services.AddScoped<IUserStateRepository, UserStateRepository>();
         
         services.AddScoped<IUserStateService, UserStateService>();
         services.AddScoped<ITelegramMessageService, TelegramMessageService>();
-        services.AddSingleton<ITelegramCalendarParser, TelegramCalendarParser>();
         
+        services.AddSingleton<ITelegramCalendarParser, TelegramCalendarParser>();
         services.AddSingleton<CalendarBuilder>(new CalendarBuilder("ru"));
         
-        services.AddScoped<UpdateHandler>();
-        services.AddSingleton<UserFlowHandlerFactory>();
-        
+        services.AddScoped<UserFlowHandlerFactory>();
         services.AddScoped<IUserFlowHandler, ProcessChildStepHandler>();
         
         return services;

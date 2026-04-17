@@ -12,14 +12,22 @@ public class TelegramCalendarParser(
         {
             if (string.IsNullOrEmpty(callbackData)) return null;
 
-            var parts = callbackData.Split(':');
-            var datePart = parts.Last();
+            if (!callbackData.StartsWith("date:")) return null;
 
-            return DateTime.TryParse(datePart, out var result) ? result : null;
+            var datePart = callbackData.Replace("date:", "");
+
+            return DateTime.TryParseExact(
+                datePart,
+                "yyyy-MM-dd",
+                null,
+                System.Globalization.DateTimeStyles.None,
+                out var result)
+                ? result
+                : null;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error while parsing the callback data: {Data}", callbackData);
+            logger.LogError(ex, "Error parsing date from: {Data}", callbackData);
             return null;
         }
     }

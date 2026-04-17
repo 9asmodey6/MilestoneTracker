@@ -32,29 +32,65 @@ public class UserStateService(
         return state;
     }
 
+    public Task<bool> AddAsync(UserState state, CancellationToken ct)
+    {
+        public async Task<bool> AddAsync(UserState state, CancellationToken ct)
+        {
+            try 
+            {
+                await dbContext.UserStates.AddAsync(state, ct); .
+                var result = await dbContext.SaveChangesAsync(ct);
+                
+                return result > 0;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error while adding user state for ChatId: {ChatId}", state.ChatId);
+                return false;
+            }
+        }
+    }
+
     public async Task UpdateAsync<T>(long chatId, UserStateType stateType, T? data, CancellationToken ct = default)
         where T : class
     {
         logger.LogInformation("Updating user state for chat {ChatId}", chatId);
 
+        var existingState = await repository.GetByChatIdAsync(chatId, ct);
+
         string? jsonData = data != null
             ? JsonSerializer.Serialize(data)
             : null;
 
-        var newState = new UserState
+        if (existingState == null)
         {
-            ChatId = chatId,
-            State = stateType,
-            StateData = jsonData,
-            UpdatedAt = DateTime.UtcNow
-        };
+            logger.LogInformation("No existing state for {ChatId}. Creating new record.", chatId);
 
-        var isUpdated = await repository.UpdateAsync(newState, ct);
+            var newState = new UserState
+            {
+                ChatId = chatId,
+                State = stateType,
+                StateData = jsonData,
+                UpdatedAt = DateTime.UtcNow
+            };
 
-        if (!isUpdated)
+            await repository.AddAsync(newState, ct);
+        }
+        else
         {
-            logger.LogWarning("Failed to update user state for chat {ChatId}", chatId);
-            throw new InvalidOperationException($"Failed to update user state for chat {chatId}");
+            logger.LogInformation("Existing state found for {ChatId}. Modifying properties.", chatId);
+
+            existingState.State = stateType;
+            existingState.StateData = jsonData;
+            existingState.UpdatedAt = DateTime.UtcNow;
+
+            var isUpdated = await repository.UpdateAsync(existingState, ct);
+
+            if (!isUpdated)
+            {
+                logger.LogWarning("Failed to update user state for chat {ChatId}", chatId);
+                throw new InvalidOperationException($"Failed to update user state for chat {chatId}");
+            }
         }
     }
 
