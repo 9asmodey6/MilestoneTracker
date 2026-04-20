@@ -6,8 +6,8 @@ using Domain.Enums;
 public interface IUserStateService
 {
     Task<UserState> GetAsync(long chatId, CancellationToken ct = default);
-    
-    Task<bool> AddAsync(UserState state, CancellationToken ct);
+
+    Task AddAsync<T>(long chatId, UserStateType stateType, T? data, CancellationToken ct = default) where T : class;
     
     Task UpdateAsync<T>(long chatId, UserStateType stateType, T? data, CancellationToken ct = default) where T : class;
 

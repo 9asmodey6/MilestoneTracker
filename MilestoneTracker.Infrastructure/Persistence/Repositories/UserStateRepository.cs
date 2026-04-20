@@ -21,9 +21,15 @@ public class UserStateRepository(
             .ExecuteUpdateAsync(setter => setter
                     .SetProperty(u => u.State, state.State)
                     .SetProperty(u => u.StateData, state.StateData)
-                    .SetProperty(u => u.UpdatedAt, state.UpdatedAt), 
+                    .SetProperty(u => u.UpdatedAt, state.UpdatedAt),
                 ct);
-        
+
         return affectedRows > 0;
+    }
+
+    public async Task AddAsync(UserState state, CancellationToken ct)
+    {
+        dbContext.UserStates.Add(state);
+        await dbContext.SaveChangesAsync(ct);
     }
 }

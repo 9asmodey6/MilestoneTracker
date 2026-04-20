@@ -11,16 +11,13 @@ using Microsoft.Extensions.Logging;
 using Models;
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using Telegram.CalendarKit;
-using Telegram.CalendarKit.Models.Enums;
 
 public class UpdateHandler(
     IMediator mediator,
     ILogger<UpdateHandler> logger,
     IUserStateService stateService,
     UserFlowHandlerFactory handlerFactory,
-    ITelegramBotClient botClient,
-    CalendarBuilder calendarBuilder)
+    ITelegramBotClient botClient)
 {
     public async Task HandleUpdateAsync(Update update, CancellationToken ct)
     {
@@ -30,15 +27,16 @@ public class UpdateHandler(
             logger.LogError("Failed to parse BotContext from Update {UpdateId}", update.Id);
             return;
         }
-        
+
         logger.LogInformation("Processing update for ChatId: {ChatId}", context.ChatId);
-        
+
         if (context.IsCallback)
         {
             await botClient.AnswerCallbackQuery(context.CallbackQueryId!, cancellationToken: ct);
-            await HandleCallbackQueryAsync(context, ct); // Передаем context!
+            await HandleCallbackQueryAsync(context, ct);
             return;
         }
+
         if (context.Text?.StartsWith('/') ?? false)
         {
             await HandleCommandAsync(context, ct);
@@ -66,25 +64,14 @@ public class UpdateHandler(
         BotContext context,
         CancellationToken ct)
     {
+        logger.LogInformation("DEBUG: CallbackData received: {Data}", context.Text);
+
         var state = await stateService.GetAsync(context.ChatId, ct);
         var data = context.Text;
 
         if (string.IsNullOrEmpty(data))
         {
             logger.LogWarning("Unhandled callback query from {ChatId}: {Data}", context.ChatId, data);
-            return;
-        }
-
-        if (data.Contains(UiConstants.CallbackQueries.Next)
-            || data.Contains(UiConstants.CallbackQueries.Previous))
-        {
-            var updatedMarkup = await calendarBuilder.HandleNavigation(data, CalendarViewType.Default);
-            await botClient.EditMessageReplyMarkup(
-                chatId: context.ChatId,
-                messageId: context.MessageId!.Value,
-                replyMarkup: updatedMarkup,
-                cancellationToken: ct);
-
             return;
         }
 
@@ -125,8 +112,10 @@ public class UpdateHandler(
         {
             case UiConstants.ReplyButtons.AddChild:
                 var handler = handlerFactory.GetHandler(UserStateType.AddChildStarted);
+                state.State = UserStateType.AddChildStarted;
                 await handler.HandleAsync(context, state, ct);
                 break;
+            case UiConstants.ReplyButtons.MyChildren:
         }
     }
 

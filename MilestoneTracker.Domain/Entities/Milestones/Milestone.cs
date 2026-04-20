@@ -17,7 +17,7 @@ public class Milestone
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     
     public MilestoneCategory Category { get; set; }
-    public int CreatorParentId { get; set; } 
+    public int CreatorId { get; set; } 
     public Parent Creator { get; set; } = null!;
     public List<MilestoneMedia> MediaFiles { get; set; } = new();
 

@@ -1,5 +1,6 @@
 ﻿namespace MilestoneTracker.Application.Common.Commands.Bot.Start;
 
+using Domain.Enums;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using MilestoneTracker.Application.Common.Interfaces;
@@ -35,6 +36,8 @@ public class StartCommandHandler(
                 logger.LogInformation("Failed to create new Parent with ChatId: {ChatId}", request.ChatId);
                 throw new Exception($"Failed to create parent with id: {newParent.Id}");
             }
+            
+            await userStateService.AddAsync<string>(request.ChatId, UserStateType.Idle, null, ct);
 
             logger.LogInformation("Created new Parent with ChatId: {ChatId}", request.ChatId);
 

@@ -18,7 +18,6 @@ using Serilog.Sinks.SystemConsole.Themes;
 using Services;
 using Services.BackgroundServices;
 using Telegram.Bot;
-using Telegram.CalendarKit;
 
 public static class DependencyInjection
 {
@@ -49,8 +48,7 @@ public static class DependencyInjection
         services.AddScoped<IUserStateService, UserStateService>();
         services.AddScoped<ITelegramMessageService, TelegramMessageService>();
         
-        services.AddSingleton<ITelegramCalendarParser, TelegramCalendarParser>();
-        services.AddSingleton<CalendarBuilder>(new CalendarBuilder("ru"));
+        services.AddSingleton<ITelegramDateParser, TelegramDateParser>();
         
         services.AddScoped<UserFlowHandlerFactory>();
         services.AddScoped<IUserFlowHandler, ProcessChildStepHandler>();

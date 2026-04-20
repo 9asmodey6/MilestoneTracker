@@ -32,22 +32,25 @@ public class UserStateService(
         return state;
     }
 
-    public Task<bool> AddAsync(UserState state, CancellationToken ct)
+    public async Task AddAsync<T>(long chatId, UserStateType stateType, T? data = null, CancellationToken ct = default)
+        where T : class
     {
-        public async Task<bool> AddAsync(UserState state, CancellationToken ct)
+        try
         {
-            try 
+            var newState = new UserState
             {
-                await dbContext.UserStates.AddAsync(state, ct); .
-                var result = await dbContext.SaveChangesAsync(ct);
-                
-                return result > 0;
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Error while adding user state for ChatId: {ChatId}", state.ChatId);
-                return false;
-            }
+                ChatId = chatId,
+                State = stateType,
+                StateData = JsonSerializer.Serialize(data),
+                UpdatedAt = DateTime.UtcNow
+            };
+            
+            await repository.AddAsync(newState, ct);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to persist state for {ChatId}", chatId);
+            throw new InvalidOperationException($"Database error occured: {ex.Message}");
         }
     }
 
