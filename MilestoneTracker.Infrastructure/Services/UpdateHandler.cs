@@ -3,6 +3,7 @@
 using Application.Common.Commands.Bot.Start;
 using Application.Common.Commands.State;
 using Application.Common.Constants;
+using Application.Common.Features.Children.GetChildren;
 using Application.Common.Interfaces;
 using Domain.Entities;
 using Domain.Enums;
@@ -116,6 +117,9 @@ public class UpdateHandler(
                 await handler.HandleAsync(context, state, ct);
                 break;
             case UiConstants.ReplyButtons.MyChildren:
+               await mediator.Send(new GetChildrenQuery(
+                    context.ChatId), ct);
+                break;
         }
     }
 
@@ -123,6 +127,8 @@ public class UpdateHandler(
     {
         UiConstants.ReplyButtons.AddChild => true,
         UiConstants.ReplyButtons.AddMilestone => true,
+        UiConstants.ReplyButtons.MyChildren => true,
+        UiConstants.ReplyButtons.History => true,
         UiConstants.ReplyButtons.Help => true,
         _ => false
     };

@@ -26,6 +26,12 @@ public static class BotKeyboards
                 "Пропустить фото ⏭️",
                 UiConstants.CallbackQueries.SkipPhoto));
     }
+    
+    public static InlineKeyboardMarkup AddChildKeyboard => new InlineKeyboardMarkup(
+        new[]
+        {
+            new[] { InlineKeyboardButton.WithCallbackData("➕ Добавить ребёнка", "add_child") }
+        });
        
        
 }

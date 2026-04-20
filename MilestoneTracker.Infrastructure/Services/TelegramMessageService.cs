@@ -3,6 +3,7 @@
 using Application.Common.Interfaces;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
+using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 
 public class TelegramMessageService(
@@ -21,6 +22,7 @@ public class TelegramMessageService(
                 chatId: chatId,
                 text: text,
                 replyMarkup: replyMarkup,
+                parseMode: Telegram.Bot.Types.Enums.ParseMode.Html,
                 cancellationToken: ct);
             
             logger.LogInformation("Sent message to {ChatId}", chatId);
@@ -31,20 +33,73 @@ public class TelegramMessageService(
         }
     }
 
-    public Task SendMessageWithInlineKeyboardAsync(long chatId, string text, InlineKeyboardMarkup keyboard,
+    public async Task SendMessageWithInlineKeyboardAsync(long chatId, string text, InlineKeyboardMarkup keyboard,
         CancellationToken ct = default)
     {
-        return Task.CompletedTask;
+        await SendTextMessageAsync(chatId, text, keyboard, ct);
     }
 
-    public Task EditMessageTextAsync(long chatId, int messageId, string newText, InlineKeyboardMarkup? keyboard = null,
+    public async Task EditMessageTextAsync(long chatId, int messageId, string newText, InlineKeyboardMarkup? keyboard = null,
         CancellationToken ct = default)
     {
-        return Task.CompletedTask;
+        try
+        {
+            await botClient.EditMessageText(
+                chatId: chatId,
+                messageId: messageId,
+                text: newText,
+                replyMarkup: keyboard,
+                parseMode: Telegram.Bot.Types.Enums.ParseMode.Html,
+                cancellationToken: ct);
+            
+            logger.LogInformation("Edited message {MessageId} for {ChatId}", messageId, chatId);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to edit message {MessageId}", messageId);
+        }
     }
 
-    public Task AnswerCallbackQueryAsync(string callbackQueryId, string? text = null, CancellationToken ct = default)
+    public async Task AnswerCallbackQueryAsync(string callbackQueryId, string? text = null, CancellationToken ct = default)
     {
-        return Task.CompletedTask;
+        try
+        {
+            await botClient.AnswerCallbackQuery(
+                callbackQueryId: callbackQueryId,
+                text: text,
+                cancellationToken: ct);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to answer callback query {Id}", callbackQueryId);
+        }
+    }
+    
+    public async Task SendPhotoAsync(
+        long chatId, 
+        string photoSource,
+        string? caption = null, 
+        CancellationToken ct = default)
+    {
+        try
+        {
+            InputFile photo = photoSource.StartsWith("http") 
+                ? InputFile.FromUri(photoSource) 
+                : InputFile.FromFileId(photoSource);
+
+            await botClient.SendPhoto(
+                chatId: chatId,
+                photo: photo,
+                caption: caption,
+                parseMode: Telegram.Bot.Types.Enums.ParseMode.Html,
+                cancellationToken: ct
+            );
+
+            logger.LogInformation("Sent photo to {ChatId}", chatId);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to send photo to {ChatId}", chatId);
+        }
     }
 }

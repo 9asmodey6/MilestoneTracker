@@ -36,4 +36,11 @@ public class ParentRepository(
         await dbContext.SaveChangesAsync(ct);
         return child.Id;
     }
+
+    public async Task<List<Child>> GetChildrenAsync(long chatId, CancellationToken ct)
+    {
+        return await dbContext.Children
+            .Where(c => c.Parent.ChatId == chatId)
+            .ToListAsync(ct);
+    }
 }

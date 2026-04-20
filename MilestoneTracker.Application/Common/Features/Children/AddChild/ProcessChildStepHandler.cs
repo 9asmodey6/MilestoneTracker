@@ -1,10 +1,12 @@
 ﻿namespace MilestoneTracker.Application.Common.Features.Children.AddChild;
 
+using System.Text;
 using System.Text.Json;
 using Constants;
 using Domain.Entities;
 using Domain.Entities.ValueObjects;
 using Domain.Enums;
+using Exceptions;
 using Infrastructure.Models;
 using Interfaces;
 using MediatR;
@@ -30,23 +32,55 @@ public class ProcessChildStepHandler(
 
     public async Task HandleAsync(BotContext context, UserState userState, CancellationToken ct)
     {
-        var data = JsonSerializer.Deserialize<CreateChildData>(userState?.StateData ?? "{}")
-                   ?? new CreateChildData();
-
-        switch (userState!.State)
+        try
         {
-            case UserStateType.AddChildStarted:
-                await HandleStartedStep(context, data, ct);
-                break;
-            case UserStateType.AddChildEnteringName:
-                await HandleNameStep(context, data, ct);
-                break;
-            case UserStateType.AddChildEnteringBirthdate:
-                await HandleBirthdayStep(context, data, ct);
-                break;
-            case UserStateType.AddChildUploadingPhoto:
-                await HandlePhotoStep(context, data, ct);
-                break;
+            var data = JsonSerializer.Deserialize<CreateChildData>(userState.StateData ?? "{}")
+                       ?? new CreateChildData();
+
+            switch (userState!.State)
+            {
+                case UserStateType.AddChildStarted:
+                    await HandleStartedStep(context, data, ct);
+                    break;
+                case UserStateType.AddChildEnteringName:
+                    await HandleNameStep(context, data, ct);
+                    break;
+                case UserStateType.AddChildEnteringBirthdate:
+                    await HandleBirthdayStep(context, data, ct);
+                    break;
+                case UserStateType.AddChildUploadingPhoto:
+                    await HandlePhotoStep(context, data, ct);
+                    break;
+            }
+        }
+        catch (ValidationException ex)
+        {
+            var errorMessage = new StringBuilder("⚠️ <b>Ошибки валидации:</b>\n\n");
+    
+            foreach (var errorGroup in ex.Errors)
+            {
+                foreach (var error in errorGroup.Value)
+                {
+                    errorMessage.AppendLine($"• {error}");
+                }
+            }
+
+            errorMessage.AppendLine("\nПожалуйста, исправьте данные и попробуйте снова.");
+            
+            await messageService.SendTextMessageAsync(context.ChatId, errorMessage.ToString(), ct: ct);
+            
+            await userStateService.ResetAsync(context.ChatId, ct);
+        }
+        catch (JsonException ex)
+        {
+            logger.LogError(ex, "Failed to deserialize StateData for ChatId: {ChatId}", context.ChatId);
+        
+            await messageService.SendTextMessageAsync(
+                context.ChatId,
+                "❌ Произошла ошибка. Попробуй начать заново с кнопки '➕ Добавить ребёнка'",
+                ct: ct);
+        
+            await userStateService.ResetAsync(context.ChatId, ct);
         }
     }
 

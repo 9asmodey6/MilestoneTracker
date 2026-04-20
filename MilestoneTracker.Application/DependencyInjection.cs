@@ -1,6 +1,7 @@
 ﻿namespace MilestoneTracker.Application;
 
 using System.Reflection;
+using Common.Behaviors;
 using Common.Interfaces;
 using FluentValidation;
 using MediatR;
@@ -14,7 +15,7 @@ public static class DependencyInjection
 
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
-        // services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
         services.AddAutoMapper(cfg => { },
             Assembly.GetExecutingAssembly());

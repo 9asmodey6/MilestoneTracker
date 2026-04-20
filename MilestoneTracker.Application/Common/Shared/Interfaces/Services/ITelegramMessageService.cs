@@ -28,4 +28,10 @@ public interface ITelegramMessageService
         string callbackQueryId,
         string? text = null,
         CancellationToken ct = default);
+
+    Task SendPhotoAsync(
+        long chatId,
+        string photoSource,
+        string? caption = null,
+        CancellationToken ct = default);
 }
