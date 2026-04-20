@@ -1,11 +1,12 @@
-﻿namespace MilestoneTracker.Application.Common.Commands.Bot.Start;
+﻿namespace MilestoneTracker.Application.Common.Commands.BotCommands.Start;
 
-using Domain.Enums;
+using Bot.Start;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using MilestoneTracker.Application.Common.Interfaces;
+using MilestoneTracker.Application.Common.Shared.Bot.Keyboards;
 using MilestoneTracker.Domain.Entities;
-using Shared.Bot.Keyboards;
+using MilestoneTracker.Domain.Enums;
 
 public class StartCommandHandler(
     IParentRepository parentRepository,

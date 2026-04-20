@@ -88,10 +88,6 @@ namespace MilestoneTracker.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("creator_id");
 
-                    b.Property<int>("CreatorParentId")
-                        .HasColumnType("integer")
-                        .HasColumnName("creator_parent_id");
-
                     b.Property<string>("Description")
                         .HasMaxLength(2000)
                         .HasColumnType("character varying(2000)")

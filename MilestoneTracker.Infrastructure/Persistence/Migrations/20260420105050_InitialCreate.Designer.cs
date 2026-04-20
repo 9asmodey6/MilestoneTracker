@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MilestoneTracker.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260417073643_InitialCreate")]
+    [Migration("20260420105050_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -90,10 +90,6 @@ namespace MilestoneTracker.Infrastructure.Migrations
                     b.Property<int>("CreatorId")
                         .HasColumnType("integer")
                         .HasColumnName("creator_id");
-
-                    b.Property<int>("CreatorParentId")
-                        .HasColumnType("integer")
-                        .HasColumnName("creator_parent_id");
 
                     b.Property<string>("Description")
                         .HasMaxLength(2000)

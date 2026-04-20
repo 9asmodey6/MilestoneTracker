@@ -1,6 +1,7 @@
 ﻿namespace MilestoneTracker.Infrastructure.Services;
 
 using Application.Common.Commands.Bot.Start;
+using Application.Common.Commands.BotCommands.Cancel;
 using Application.Common.Commands.State;
 using Application.Common.Constants;
 using Application.Common.Features.Children.GetChildren;
@@ -91,6 +92,10 @@ public class UpdateHandler(
                     context.Username), ct);
                 break;
 
+            case "/cancel":
+                await mediator.Send(new CancelCommand(context.ChatId), ct);
+                break;
+                
             default:
                 throw new InvalidOperationException();
                 // await HandleUnknownCommand(context.ChatId, ct);

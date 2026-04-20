@@ -78,7 +78,6 @@ namespace MilestoneTracker.Infrastructure.Migrations
                     occurred_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     category = table.Column<int>(type: "integer", nullable: false),
-                    creator_parent_id = table.Column<int>(type: "integer", nullable: false),
                     creator_id = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
