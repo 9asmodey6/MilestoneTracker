@@ -4,7 +4,7 @@ using FluentValidation;
 using MediatR;
 
 public class ValidationBehavior<TRequest, TResponse>(
-    IEnumerable<IValidator<TRequest>> _validators)
+    IEnumerable<IValidator<TRequest>> validators)
     : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>
 {
@@ -13,7 +13,7 @@ public class ValidationBehavior<TRequest, TResponse>(
         RequestHandlerDelegate<TResponse> next,
         CancellationToken cancellationToken)
     {
-        if (!_validators.Any())
+        if (!validators.Any())
         {
             return await next();
         }
@@ -22,7 +22,7 @@ public class ValidationBehavior<TRequest, TResponse>(
 
         var validationResults = await Task
             .WhenAll(
-                _validators
+                validators
                     .Select(v => v
                         .ValidateAsync(context, cancellationToken)));
 
