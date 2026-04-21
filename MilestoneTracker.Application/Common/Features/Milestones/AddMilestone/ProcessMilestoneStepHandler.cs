@@ -11,11 +11,14 @@ using Infrastructure.Models;
 using Interfaces;
 using Microsoft.Extensions.Logging;
 using Shared.Abstractions.Interfaces;
+using Shared.Bot.Keyboards;
 using Telegram.Bot;
+using Telegram.Bot.Types.ReplyMarkups;
 
 public class ProcessMilestoneStepHandler(
     ITelegramMessageService messageService,
     IUserStateService userStateService,
+    IParentRepository parentRepository,
     ILogger<ProcessMilestoneStepHandler> logger) : IUserFlowHandler
 {
     public bool CanHandle(UserStateType userState) =>
@@ -26,8 +29,8 @@ public class ProcessMilestoneStepHandler(
     {
         try
         {
-            var data = JsonSerializer.Deserialize<CreateChildData>(userState.StateData ?? "{}")
-                       ?? new CreateChildData();
+            var data = JsonSerializer.Deserialize<CreateMilestoneData>(userState.StateData ?? "{}")
+                       ?? new CreateMilestoneData();
 
             switch (userState.State)
             {
@@ -39,7 +42,7 @@ public class ProcessMilestoneStepHandler(
         catch (ValidationException ex)
         {
             var errorMessage = new StringBuilder("⚠️ <b>Ошибки валидации:</b>\n\n");
-    
+
             foreach (var errorGroup in ex.Errors)
             {
                 foreach (var error in errorGroup.Value)
@@ -49,26 +52,48 @@ public class ProcessMilestoneStepHandler(
             }
 
             errorMessage.AppendLine("\nПожалуйста, исправьте данные и попробуйте снова.");
-            
+
             await messageService.SendTextMessageAsync(context.ChatId, errorMessage.ToString(), ct: ct);
-            
+
             await userStateService.ResetAsync(context.ChatId, ct);
         }
         catch (JsonException ex)
         {
             logger.LogError(ex, "Failed to deserialize StateData for ChatId: {ChatId}", context.ChatId);
-        
+
             await messageService.SendTextMessageAsync(
                 context.ChatId,
                 "❌ Произошла ошибка. Попробуй начать заново с кнопки '➕ Добавить воспоминание'",
                 ct: ct);
-        
+
             await userStateService.ResetAsync(context.ChatId, ct);
         }
     }
 
-    private async Task HandleStartedStep(BotContext context, CreateChildData data, CancellationToken ct)
+    private async Task HandleStartedStep(BotContext context, CreateMilestoneData data, CancellationToken ct)
     {
+        logger.LogInformation("Started milestone adding step for chat {ChatId}, waiting for name entering",
+            context.ChatId);
         
+        var children = await parentRepository.GetChildrenAsync(context.ChatId, ct);
+        if (children.Count == 0)
+        {
+            logger.LogError("Children not found for chat {ChatId}", context.ChatId);
+            await messageService.SendMessageWithInlineKeyboardAsync(
+                context.ChatId,
+                "<b>В базе пока нет ваших детей.</b>\n\nНажмите кнопку ниже, чтобы добавить первого ребенка и начать отслеживать его достижения! 👇",
+                BotKeyboards.AddChildKeyboard,
+                ct);
+            await userStateService.ResetAsync(context.ChatId, ct);
+            return;
+        }
+
+        if (children.Count == 1)
+        {
+            var child = children.First();
+            var updatedData = data with { ChildId = child.Id };
+            
+            
+        }
     }
 }
