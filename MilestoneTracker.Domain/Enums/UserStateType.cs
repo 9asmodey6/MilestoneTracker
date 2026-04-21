@@ -11,12 +11,13 @@ public enum UserStateType
     AddChildUploadingPhoto = 13,
     
     
-    AddMilestoneSelectingChild = 20,
-    AddMilestoneSelectingCategory = 21,
-    AddMilestoneEnteringDate = 22,
-    AddMilestoneEnteringTitle = 23,
-    AddMilestoneEnteringDescription = 24,
-    AddMilestoneUploadingMedia = 25,
-    AddMilestoneConfirming = 26,
+    AddMilestoneStarted = 20,
+    AddMilestoneSelectingChild = 21,
+    AddMilestoneSelectingCategory = 22,
+    AddMilestoneEnteringDate = 23,
+    AddMilestoneEnteringTitle = 24,
+    AddMilestoneEnteringDescription = 25,
+    AddMilestoneUploadingMedia = 26,
+    AddMilestoneConfirming = 27,
     
 }

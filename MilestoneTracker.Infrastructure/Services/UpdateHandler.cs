@@ -117,13 +117,18 @@ public class UpdateHandler(
         switch (context.Text)
         {
             case UiConstants.ReplyButtons.AddChild:
-                var handler = handlerFactory.GetHandler(UserStateType.AddChildStarted);
+                var addChildHandler = handlerFactory.GetHandler(UserStateType.AddChildStarted);
                 state.State = UserStateType.AddChildStarted;
-                await handler.HandleAsync(context, state, ct);
+                await addChildHandler.HandleAsync(context, state, ct);
                 break;
             case UiConstants.ReplyButtons.MyChildren:
                await mediator.Send(new GetChildrenQuery(
                     context.ChatId), ct);
+                break;
+            case UiConstants.ReplyButtons.AddMilestone:
+                var addMilestoneHandler = handlerFactory.GetHandler(UserStateType.AddMilestoneStarted);
+                state.State = UserStateType.AddMilestoneStarted;
+                await addMilestoneHandler.HandleAsync(context, state, ct);
                 break;
         }
     }
