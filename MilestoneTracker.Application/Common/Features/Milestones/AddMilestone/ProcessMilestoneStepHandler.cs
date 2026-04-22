@@ -11,8 +11,6 @@ using Interfaces;
 using Microsoft.Extensions.Logging;
 using Shared.Abstractions.Interfaces;
 using Shared.Bot.Keyboards;
-using Telegram.Bot;
-using Telegram.Bot.Types.ReplyMarkups;
 
 public class ProcessMilestoneStepHandler(
     ITelegramMessageService messageService,
@@ -279,7 +277,7 @@ public class ProcessMilestoneStepHandler(
         }
         else
         {
-            title = context.Text;
+            title = context.Text!;
             confirmationText = $"Заголовок «<b>{title}</b>» сохранен! ✅";
         }
 
@@ -376,8 +374,8 @@ public class ProcessMilestoneStepHandler(
                 context.ChatId,
                 $"✅ Отлично! Загружено {data.MediaCount} {GetMediaWord(data.MediaCount)}.\n\nТеперь посмотрим на итоговое воспоминание:",
                 ct: ct);
-            
-            
+
+            var updatedData = data.AddCaption("test");
             
             await userStateService.UpdateAsync(
                 context.ChatId,
