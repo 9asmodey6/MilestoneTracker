@@ -1,5 +1,7 @@
 ﻿namespace MilestoneTracker.Application.Common.Shared.Bot.Keyboards;
 
+using Domain.Entities;
+using Domain.Enums;
 using MilestoneTracker.Application.Common.Constants;
 using Telegram.Bot.Types.ReplyMarkups;
 
@@ -13,25 +15,107 @@ public static class BotKeyboards
     public static ReplyKeyboardMarkup MainMenuKeyboard => new([
         [new KeyboardButton(UiConstants.ReplyButtons.AddMilestone)],
         [
-            new KeyboardButton(UiConstants.ReplyButtons.MyChildren), 
+            new KeyboardButton(UiConstants.ReplyButtons.MyChildren),
             new KeyboardButton(UiConstants.ReplyButtons.History)
         ],
         [new KeyboardButton(UiConstants.ReplyButtons.Help)]
     ]) { ResizeKeyboard = true };
-    
-    public static InlineKeyboardMarkup SkipPhotoKeyboard()
+
+    public static InlineKeyboardMarkup SkipKeyboard()
     {
         return new(InlineKeyboardButton
             .WithCallbackData(
-                "Пропустить фото ⏭️",
-                UiConstants.CallbackQueries.SkipPhoto));
+                "Пропустить ⏭️",
+                UiConstants.CallbackQueries.Skip));
     }
-    
+
     public static InlineKeyboardMarkup AddChildKeyboard => new InlineKeyboardMarkup(
         new[]
         {
             new[] { InlineKeyboardButton.WithCallbackData("➕ Добавить ребёнка", "add_child") }
         });
-       
-       
+
+    public static InlineKeyboardMarkup CategorySelectionKeyboard()
+    {
+        var categoryNames = new Dictionary<MilestoneCategory, string>
+        {
+            { MilestoneCategory.General, "🌐 Общее" },
+            { MilestoneCategory.FirstTime, "🆕 Впервые" },
+            { MilestoneCategory.Health, "🏥 Здоровье" },
+            { MilestoneCategory.Funny, "😂 Смешное" },
+            { MilestoneCategory.Achievement, "🏆 Достижение" },
+            { MilestoneCategory.Adventure, "🚀 Приключение" },
+            { MilestoneCategory.Social, "🤝 Социальное" },
+            { MilestoneCategory.Development, "🧠 Развитие" },
+            { MilestoneCategory.Food, "🍏 Еда" },
+            { MilestoneCategory.Sleep, "😴 Сон" },
+            { MilestoneCategory.Emotions, "🎭 Эмоции" }
+        };
+
+        var buttons = Enum.GetValues<MilestoneCategory>()
+            .Select(category => InlineKeyboardButton.WithCallbackData(
+                text: categoryNames.TryGetValue(category, out var name) ? name : category.ToString(),
+                callbackData: ((int)category).ToString()
+            ));
+
+        return new InlineKeyboardMarkup(buttons.Chunk(2));
+    }
+
+    public static InlineKeyboardMarkup ChildSelectionKeyboard(List<Child> children)
+    {
+        var buttons = children.Select(child =>
+            InlineKeyboardButton.WithCallbackData(
+                text: $"🧒 {child.Name}",
+                callbackData: child.Id.ToString()
+            ));
+
+        return new InlineKeyboardMarkup(buttons.Chunk(1));
+    }
+
+    public static InlineKeyboardMarkup SelectCurrentDate()
+    {
+        string today = DateOnly.FromDateTime(DateTime.Today).ToString("yyyy-MM-dd");
+
+        return new InlineKeyboardMarkup(
+            InlineKeyboardButton.WithCallbackData("Сегодняшняя дата 📅", today)
+        );
+    }
+    
+    public static InlineKeyboardMarkup MediaUploadKeyboard(int currentCount)
+    {
+        return new InlineKeyboardMarkup(new[]
+        {
+            new[]
+            {
+                InlineKeyboardButton.WithCallbackData(
+                    $"✅ Завершить ({currentCount} шт.)",
+                    UiConstants.CallbackQueries.FinishMediaUpload)
+            },
+            new[]
+            {
+                InlineKeyboardButton.WithCallbackData(
+                    "➕ Добавить ещё",
+                    UiConstants.CallbackQueries.AddMoreMedia)
+            },
+            new[]
+            {
+                InlineKeyboardButton.WithCallbackData(
+                    "⏭️ Пропустить все",
+                    UiConstants.CallbackQueries.Skip)
+            }
+        });
+    }
+    
+    public static InlineKeyboardMarkup FirstMediaUploadKeyboard()
+    {
+        return new InlineKeyboardMarkup(new[]
+        {
+            new[]
+            {
+                InlineKeyboardButton.WithCallbackData(
+                    "⏭️ Пропустить",
+                    UiConstants.CallbackQueries.Skip)
+            }
+        });
+    }
 }

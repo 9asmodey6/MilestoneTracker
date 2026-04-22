@@ -20,7 +20,13 @@ public static class UiConstants
 
     public static class CallbackQueries
     {
-        public const string SkipPhoto = "📋 ";
+        public const string Skip = "skip";
+        public const string FinishMediaUpload = "finish_media_upload";
+        public const string AddMoreMedia = "add_more_media";
+        
+        public const string SelectChild = "select_child";
+        
+        public const string SelectCategory = "select_category";
         
     }
 }

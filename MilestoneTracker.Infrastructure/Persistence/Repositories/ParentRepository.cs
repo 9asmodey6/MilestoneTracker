@@ -43,4 +43,9 @@ public class ParentRepository(
             .Where(c => c.Parent.ChatId == chatId)
             .ToListAsync(ct);
     }
+
+    public Task<Child?> GetByIdAsync(int childId, CancellationToken ct)
+    {
+        return dbContext.Children.FirstOrDefaultAsync(c => c.Id == childId, ct);
+    }
 }

@@ -134,7 +134,7 @@ public class ProcessChildStepHandler(
 
             await messageService.SendTextMessageAsync(
                 context.ChatId,
-                "⚠️ **Неверный формат даты.**\n\nПожалуйста, напиши дату рождения в формате: **ДД.ММ.ГГГГ**\nНапример: `20.04.2023`",
+                "⚠️ **Неверный формат даты.**\n\nПожалуйста, напиши дату рождения в формате:  <code>ДД.ММ.ГГГГ</code>\n(например, 22.04.2026)",
                 ct: ct);
             return;
         }
@@ -147,7 +147,7 @@ public class ProcessChildStepHandler(
         await messageService.SendTextMessageAsync(
             context.ChatId,
             $"Отлично! Дата рождения: {birthDate.Value:dd.MM.yyyy}\n\nТеперь отправь фото малыша (или нажми кнопку ниже, чтобы пропустить):",
-            replyMarkup: BotKeyboards.SkipPhotoKeyboard(),
+            replyMarkup: BotKeyboards.SkipKeyboard(),
             ct: ct);
 
         await userStateService.UpdateAsync<CreateChildData>(
@@ -163,14 +163,14 @@ public class ProcessChildStepHandler(
             context.ChatId);
 
         bool isSkipped = context.IsCallback
-                         && context.CallbackData == UiConstants.CallbackQueries.SkipPhoto;
+                         && context.CallbackData == UiConstants.CallbackQueries.Skip;
 
         if (!isSkipped && !context.HasPhoto)
         {
             await messageService.SendTextMessageAsync(
                 context.ChatId,
                 "Пожалуйста, отправь фото или нажми на кнопку «Пропустить»! 👇",
-                BotKeyboards.SkipPhotoKeyboard(),
+                BotKeyboards.SkipKeyboard(),
                 ct: ct);
             return;
         }
