@@ -1,5 +1,6 @@
 ﻿namespace MilestoneTracker.Application.Common.Interfaces;
 
+using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 
 public interface ITelegramMessageService
@@ -33,5 +34,16 @@ public interface ITelegramMessageService
         long chatId,
         string photoSource,
         string? caption = null,
+        CancellationToken ct = default);
+
+    Task SendVideoAsync(
+        long chatId,
+        string videoSource,
+        string? caption = null,
+        CancellationToken ct = default);
+    
+    Task SendMediaGroupAsync(
+        long chatId, 
+        IEnumerable<IAlbumInputMedia> media, 
         CancellationToken ct = default);
 }

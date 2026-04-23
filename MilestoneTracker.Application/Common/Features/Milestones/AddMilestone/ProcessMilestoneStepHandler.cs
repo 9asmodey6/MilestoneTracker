@@ -11,6 +11,7 @@ using Interfaces;
 using Microsoft.Extensions.Logging;
 using Shared.Abstractions.Interfaces;
 using Shared.Bot.Keyboards;
+using Telegram.Bot.Types;
 
 public class ProcessMilestoneStepHandler(
     ITelegramMessageService messageService,
@@ -18,6 +19,8 @@ public class ProcessMilestoneStepHandler(
     IParentRepository parentRepository,
     ILogger<ProcessMilestoneStepHandler> logger) : IUserFlowHandler
 {
+    private static readonly SemaphoreSlim StateLock = new(1, 1);
+
     public bool CanHandle(UserStateType userState) =>
         userState >= UserStateType.AddMilestoneStarted
         && userState <= UserStateType.AddMilestoneConfirming;
@@ -51,6 +54,9 @@ public class ProcessMilestoneStepHandler(
                     break;
                 case UserStateType.AddMilestoneUploadingMedia:
                     await HandleMediaStep(context, data, ct);
+                    break;
+                case UserStateType.AddMilestoneConfirming:
+                    await HandleConfirmingAsync(context, data, ct);
                     break;
             }
         }
@@ -155,7 +161,7 @@ public class ProcessMilestoneStepHandler(
             throw new InvalidOperationException("Child not found");
         }
 
-        var updatedData = data with { ChildId = child.Id };
+        var updatedData = data with { ChildId = child.Id, ChildName = child.Name };
 
         await messageService.SendMessageWithInlineKeyboardAsync(
             context.ChatId,
@@ -341,13 +347,12 @@ public class ProcessMilestoneStepHandler(
 
         if (isSkipped)
         {
-            var child = await parentRepository.GetByIdAsync(data.ChildId!.Value, ct);
-
             await messageService.SendTextMessageAsync(
                 context.ChatId,
-                "⏭️ Хорошо, пропускаем медиа.\n\nДавай посмотрим на итоговое воспоминание:" +
-                data.ToString(child!.Name),
+                "⏭️ Хорошо, пропускаем медиа.\n\nДавай посмотрим на итоговое воспоминание:",
                 ct: ct);
+
+            await SendMilestonePreviewAsync(context.ChatId, data, ct);
 
             await userStateService.UpdateAsync(
                 context.ChatId,
@@ -370,28 +375,167 @@ public class ProcessMilestoneStepHandler(
                 return;
             }
 
+            if (data.MediaCount == 1)
+            {
+                var media = data.MediaGroup![0];
+
+                if (media is InputMediaPhoto photo)
+                {
+                    await messageService.SendPhotoAsync(
+                        context.ChatId,
+                        ((InputFileId)photo.Media).Id,
+                        $"✅ Отлично! Фото загружено.\n\nТеперь посмотрим на итоговое воспоминание:" +
+                        data.GetSummary(data.ChildName),
+                        ct: ct);
+
+                    await SendMilestonePreviewAsync(context.ChatId, data, ct);
+
+                    return;
+                }
+
+                if (media is InputMediaVideo video)
+                {
+                    await messageService.SendVideoAsync(
+                        context.ChatId,
+                        ((InputFileId)video.Media).Id,
+                        $"✅ Отлично! Видео загружено.\n\nТеперь посмотрим на итоговое воспоминание:" +
+                        data.GetSummary(data.ChildName),
+                        ct: ct);
+
+                    await SendMilestonePreviewAsync(context.ChatId, data, ct);
+
+                    return;
+                }
+            }
+
             await messageService.SendTextMessageAsync(
                 context.ChatId,
-                $"✅ Отлично! Загружено {data.MediaCount} {GetMediaWord(data.MediaCount)}.\n\nТеперь посмотрим на итоговое воспоминание:",
+                $"✅ Отлично! Загружено {
+                    data.MediaCount} {GetMediaWord(data.MediaCount)}.\n\nТеперь посмотрим на итоговое воспоминание:",
                 ct: ct);
 
-            var updatedData = data.AddCaption("test");
-            
+            var updatedData = data.AddCaption(data.GetSummary(data.ChildName));
+            await SendMilestonePreviewAsync(context.ChatId, updatedData, ct);
+
             await userStateService.UpdateAsync(
                 context.ChatId,
                 UserStateType.AddMilestoneConfirming,
-                data,
+                updatedData,
                 ct);
         }
 
-        if (context.HasPhoto)
+        if (context.HasPhoto || context.HasVideo)
         {
-            data = data.AddPhoto(context.PhotoFileId!);
+            await StateLock.WaitAsync(ct);
+            CreateMilestoneData latestData;
+            try
+            {
+                var currentState = await userStateService.GetAsync(context.ChatId, ct);
+                latestData = JsonSerializer.Deserialize<CreateMilestoneData>(currentState?.StateData ?? "{}") ?? data;
+                latestData = context.HasPhoto
+                    ? latestData.AddPhoto(context.PhotoFileId!)
+                    : latestData.AddVideo(context.VideoFileId!);
+                await userStateService.UpdateAsync(
+                    context.ChatId,
+                    UserStateType.AddMilestoneUploadingMedia,
+                    latestData,
+                    ct);
+            }
+            finally
+            {
+                StateLock.Release();
+            }
+
+            if (!string.IsNullOrEmpty(context.MediaGroupId))
+            {
+                await Task.Delay(800, ct); // waiting till all the media come 
+
+                // checking for new data
+                var checkState = await userStateService.GetAsync(context.ChatId, ct);
+                var checkData = JsonSerializer.Deserialize<CreateMilestoneData>(checkState?.StateData ?? "{}");
+
+                // if database have more media - this message not latest
+                if (checkData?.MediaCount > latestData.MediaCount)
+                {
+                    return;
+                }
+            }
+
+            await messageService.SendMessageWithInlineKeyboardAsync(
+                context.ChatId,
+                $"{latestData.MediaCount} {GetMediaWord(latestData.MediaCount)} принято! ✍️\n\n" +
+                "Ecли хотите завершить загрузку медиа нажмите <b>Завершить</b>.\n\n" +
+                "Для загрузки дополнительных медиа просто пришлите их сюда",
+                BotKeyboards.MediaUploadKeyboard(latestData.MediaCount),
+                ct);
+        }
+    }
+
+    private async Task HandleConfirmingAsync(BotContext context, CreateMilestoneData data, CancellationToken ct)
+    {
+        logger.LogInformation("Processing title for chat {ChatId}, preparing for final step",
+            context.ChatId);
+
+        if (!context.IsCallback)
+        {
+            await messageService.SendTextMessageAsync(
+                context.ChatId,
+                "Неизвестное сообщение. Пожалуйста нажмите на кнопку ниже чтобы подтвердить создание, отменить или изменить отдельные элементы.",
+                ct: ct);
+            return;
         }
 
-        if (context.HasVideo)
+        var callback = context.CallbackData;
+
+        if (callback == UiConstants.CallbackQueries.EditMilestone.Confirm)
         {
-            data = data.AddVideo(context.VideoFileId!);
+        }
+
+        var (nextState, prompt) = callback switch
+        {
+            UiConstants.CallbackQueries.EditMilestone.EditChild => (UserStateType.AddMilestoneSelectingChild,
+                "Выберите ребенка:"),
+            UiConstants.CallbackQueries.EditMilestone.EditCategory => (UserStateType.AddMilestoneSelectingCategory,
+                "Выберите новую категорию:"),
+            UiConstants.CallbackQueries.EditMilestone.EditDate => (UserStateType.AddMilestoneEnteringDate,
+                "Введите новую дату (ДД.ММ.ГГГГ) или сегодняшнюю с помощью кнопки ниже:"),
+            UiConstants.CallbackQueries.EditMilestone.EditTitle => (UserStateType.AddMilestoneEnteringTitle,
+                "Введите новый заголовок:"),
+            UiConstants.CallbackQueries.EditMilestone.EditDescription => (UserStateType.AddMilestoneEnteringDescription,
+                "Введите новое описание:"),
+            UiConstants.CallbackQueries.EditMilestone.EditMedia => (UserStateType.AddMilestoneUploadingMedia,
+                "Пришлите новые фото или видео:"),
+            _ => (UserStateType.AddMilestoneConfirming, null)
+        };
+
+        var children = new List<Child>();
+        if (callback == UiConstants.CallbackQueries.EditMilestone.EditChild)
+        {
+            children = await parentRepository.GetChildrenAsync(context.ChatId, ct);
+        }
+
+        if (prompt != null)
+        {
+            var keyboard = callback switch
+            {
+                UiConstants.CallbackQueries.EditMilestone.EditCategory => BotKeyboards.CategorySelectionKeyboard(),
+                UiConstants.CallbackQueries.EditMilestone.EditDate => BotKeyboards.SelectCurrentDate(),
+                UiConstants.CallbackQueries.EditMilestone.EditMedia =>
+                    BotKeyboards.MediaUploadKeyboard(data.MediaCount),
+                UiConstants.CallbackQueries.EditMilestone.EditChild => BotKeyboards.ChildSelectionKeyboard(children),
+                _ => null
+            };
+
+            if (keyboard != null)
+            {
+                await messageService.SendMessageWithInlineKeyboardAsync(context.ChatId, prompt, keyboard, ct);
+            }
+            else
+            {
+                await messageService.SendTextMessageAsync(context.ChatId, prompt, ct: ct);
+            }
+
+            await userStateService.UpdateAsync(context.ChatId, nextState, data, ct);
         }
     }
 
@@ -403,5 +547,62 @@ public class ProcessMilestoneStepHandler(
             2 or 3 or 4 => "файла",
             _ => "файлов"
         };
+    }
+
+    private async Task SendMilestonePreviewAsync(long chatId, CreateMilestoneData data, CancellationToken ct)
+    {
+        var summary = data.GetSummary(data.ChildName);
+
+        if (data.MediaCount == 0)
+        {
+            await messageService.SendMessageWithInlineKeyboardAsync(
+                chatId: chatId,
+                "Хочешь что то изменить? Если нет - нажми кнопку 'Сохранить'." + summary,
+                BotKeyboards.MilestoneConfirmationKeyboard(),
+                ct);
+        }
+
+        if (data.MediaCount == 1)
+        {
+            var media = data.MediaGroup![0];
+            if (media is InputMediaPhoto photo)
+            {
+                await messageService.SendPhotoAsync(
+                    chatId,
+                    ((InputFileId)photo.Media).Id,
+                    summary,
+                    ct);
+                await messageService.SendMessageWithInlineKeyboardAsync(
+                    chatId: chatId,
+                    "Хочешь что то изменить? Если нет - нажми кнопку 'Сохранить'.",
+                    BotKeyboards.MilestoneConfirmationKeyboard(),
+                    ct);
+            }
+            else if (media is InputMediaVideo video)
+            {
+                await messageService.SendPhotoAsync(
+                    chatId,
+                    ((InputFileId)video.Media).Id,
+                    summary,
+                    ct);
+                await messageService.SendMessageWithInlineKeyboardAsync(
+                    chatId: chatId,
+                    "Хочешь что то изменить? Если нет - нажми кнопку 'Сохранить'.",
+                    BotKeyboards.MilestoneConfirmationKeyboard(),
+                    ct);
+            }
+
+            data.AddCaption(summary);
+            await messageService.SendMediaGroupAsync(
+                chatId,
+                data.MediaGroup,
+                ct);
+
+            await messageService.SendMessageWithInlineKeyboardAsync(
+                chatId: chatId,
+                "Хочешь что то изменить? Если нет - нажми кнопку 'Сохранить'.",
+                BotKeyboards.MilestoneConfirmationKeyboard(),
+                ct);
+        }
     }
 }

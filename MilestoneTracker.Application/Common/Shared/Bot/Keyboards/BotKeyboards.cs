@@ -2,7 +2,7 @@
 
 using Domain.Entities;
 using Domain.Enums;
-using MilestoneTracker.Application.Common.Constants;
+using Constants;
 using Telegram.Bot.Types.ReplyMarkups;
 
 public static class BotKeyboards
@@ -80,7 +80,7 @@ public static class BotKeyboards
             InlineKeyboardButton.WithCallbackData("Сегодняшняя дата 📅", today)
         );
     }
-    
+
     public static InlineKeyboardMarkup MediaUploadKeyboard(int currentCount)
     {
         return new InlineKeyboardMarkup(new[]
@@ -94,18 +94,12 @@ public static class BotKeyboards
             new[]
             {
                 InlineKeyboardButton.WithCallbackData(
-                    "➕ Добавить ещё",
-                    UiConstants.CallbackQueries.AddMoreMedia)
-            },
-            new[]
-            {
-                InlineKeyboardButton.WithCallbackData(
-                    "⏭️ Пропустить все",
-                    UiConstants.CallbackQueries.Skip)
+                    "❌ Отменить создание восспоминания",
+                    "/cancel")
             }
         });
     }
-    
+
     public static InlineKeyboardMarkup FirstMediaUploadKeyboard()
     {
         return new InlineKeyboardMarkup(new[]
@@ -115,6 +109,52 @@ public static class BotKeyboards
                 InlineKeyboardButton.WithCallbackData(
                     "⏭️ Пропустить",
                     UiConstants.CallbackQueries.Skip)
+            }
+        });
+    }
+
+    public static InlineKeyboardMarkup MilestoneConfirmationKeyboard()
+    {
+        return new InlineKeyboardMarkup(new[]
+        {
+            new[]
+            {
+                InlineKeyboardButton.WithCallbackData(
+                    "✅ Всё верно, сохранить",
+                    UiConstants.CallbackQueries.EditMilestone.Confirm)
+            },
+
+            new[]
+            {
+                InlineKeyboardButton.WithCallbackData(
+                    "👶 Ребёнок",
+                    UiConstants.CallbackQueries.EditMilestone.EditChild),
+                InlineKeyboardButton.WithCallbackData(
+                    "📁 Категория",
+                    UiConstants.CallbackQueries.EditMilestone.EditCategory),
+            },
+            new[]
+            {
+                InlineKeyboardButton.WithCallbackData(
+                    "📅 Дата",
+                    UiConstants.CallbackQueries.EditMilestone.EditDate),
+                InlineKeyboardButton.WithCallbackData(
+                    "📌 Заголовок",
+                    UiConstants.CallbackQueries.EditMilestone.EditTitle),
+            },
+            new[]
+            {
+                InlineKeyboardButton.WithCallbackData(
+                    "📝 Описание",
+                    UiConstants.CallbackQueries.EditMilestone.EditDescription),
+                InlineKeyboardButton.WithCallbackData(
+                    "🖼 Медиа",
+                    UiConstants.CallbackQueries.EditMilestone.EditMedia),
+            },
+
+            new[]
+            {
+                InlineKeyboardButton.WithCallbackData("❌ Отменить", "/cancel")
             }
         });
     }

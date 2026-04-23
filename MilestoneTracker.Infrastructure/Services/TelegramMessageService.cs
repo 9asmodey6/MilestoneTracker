@@ -24,7 +24,7 @@ public class TelegramMessageService(
                 replyMarkup: replyMarkup,
                 parseMode: Telegram.Bot.Types.Enums.ParseMode.Html,
                 cancellationToken: ct);
-            
+
             logger.LogInformation("Sent message to {ChatId}", chatId);
         }
         catch (Exception ex)
@@ -39,7 +39,8 @@ public class TelegramMessageService(
         await SendTextMessageAsync(chatId, text, keyboard, ct);
     }
 
-    public async Task EditMessageTextAsync(long chatId, int messageId, string newText, InlineKeyboardMarkup? keyboard = null,
+    public async Task EditMessageTextAsync(long chatId, int messageId, string newText,
+        InlineKeyboardMarkup? keyboard = null,
         CancellationToken ct = default)
     {
         try
@@ -51,7 +52,7 @@ public class TelegramMessageService(
                 replyMarkup: keyboard,
                 parseMode: Telegram.Bot.Types.Enums.ParseMode.Html,
                 cancellationToken: ct);
-            
+
             logger.LogInformation("Edited message {MessageId} for {ChatId}", messageId, chatId);
         }
         catch (Exception ex)
@@ -60,7 +61,8 @@ public class TelegramMessageService(
         }
     }
 
-    public async Task AnswerCallbackQueryAsync(string callbackQueryId, string? text = null, CancellationToken ct = default)
+    public async Task AnswerCallbackQueryAsync(string callbackQueryId, string? text = null,
+        CancellationToken ct = default)
     {
         try
         {
@@ -74,17 +76,17 @@ public class TelegramMessageService(
             logger.LogError(ex, "Failed to answer callback query {Id}", callbackQueryId);
         }
     }
-    
+
     public async Task SendPhotoAsync(
-        long chatId, 
+        long chatId,
         string photoSource,
-        string? caption = null, 
+        string? caption = null,
         CancellationToken ct = default)
     {
         try
         {
-            InputFile photo = photoSource.StartsWith("http") 
-                ? InputFile.FromUri(photoSource) 
+            InputFile photo = photoSource.StartsWith("http")
+                ? InputFile.FromUri(photoSource)
                 : InputFile.FromFileId(photoSource);
 
             await botClient.SendPhoto(
@@ -100,6 +102,55 @@ public class TelegramMessageService(
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to send photo to {ChatId}", chatId);
+        }
+    }
+
+    public async Task SendVideoAsync(
+        long chatId,
+        string videoSource,
+        string? caption = null,
+        CancellationToken ct = default)
+    {
+        try
+        {
+            InputFile video = videoSource.StartsWith("http")
+                ? InputFile.FromUri(videoSource)
+                : InputFile.FromFileId(videoSource);
+
+            await botClient.SendVideo(
+                chatId: chatId,
+                video: video,
+                caption: caption,
+                parseMode: Telegram.Bot.Types.Enums.ParseMode.Html,
+                cancellationToken: ct
+            );
+
+            logger.LogInformation("Sent video to {ChatId}", chatId);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to send video to {ChatId}", chatId);
+        }
+    }
+
+    public async Task SendMediaGroupAsync(
+        long chatId,
+        IEnumerable<IAlbumInputMedia> media,
+        CancellationToken ct = default)
+    {
+        try
+        {
+            await botClient.SendMediaGroup(
+                chatId: chatId,
+                media: media,
+                cancellationToken: ct
+            );
+
+            logger.LogInformation("Sent media group to {ChatId}", chatId);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to send media group to {ChatId}", chatId);
         }
     }
 }

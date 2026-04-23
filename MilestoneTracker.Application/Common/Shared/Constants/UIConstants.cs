@@ -10,7 +10,7 @@ public static class UiConstants
         public const string History = "📜 История";
         public const string Help = "📋 Помощь";
     }
-    
+
     public static class SlashCommands
     {
         public const string Start = "start";
@@ -23,10 +23,20 @@ public static class UiConstants
         public const string Skip = "skip";
         public const string FinishMediaUpload = "finish_media_upload";
         public const string AddMoreMedia = "add_more_media";
-        
+
         public const string SelectChild = "select_child";
-        
+
         public const string SelectCategory = "select_category";
-        
+
+        public static class EditMilestone
+        {
+            public const string Confirm = "confirm_milestone";
+            public const string EditChild = "edit_child";
+            public const string EditCategory = "edit_category";
+            public const string EditTitle = "edit_title";
+            public const string EditDate = "edit_date";
+            public const string EditDescription = "edit_description";
+            public const string EditMedia = "edit_media";
+        }
     }
 }

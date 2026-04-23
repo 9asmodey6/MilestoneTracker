@@ -5,6 +5,7 @@ using Telegram.Bot.Types;
 
 public record CreateMilestoneData(
     int? ChildId = null,
+    string? ChildName = null,
     MilestoneCategory? Category = null,
     DateOnly? Date = null,
     string? Title = null,
@@ -53,8 +54,24 @@ public record CreateMilestoneData(
 
     public int MediaCount => MediaGroup?.Count ?? 0;
 
-    public string ToString(string childName)
+    public string GetSummary(string? childName = null)
     {
-        return $"{childName} ({ChildId})";
+        var sb = new System.Text.StringBuilder();
+
+        sb.AppendLine("<b>📋 Предпросмотр воспоминания</b>");
+        sb.AppendLine();
+        sb.AppendLine($"<b>👶 Ребенок:</b> {childName ?? "Не выбран"}");
+        sb.AppendLine($"<b>📁 Категория:</b> {Category?.ToString() ?? "<i>Не указана</i>"}");
+        sb.AppendLine($"<b>📅 Дата:</b> {Date?.ToString("dd.MM.yyyy") ?? "<i>Не указана</i>"}");
+        sb.AppendLine($"<b>📌 Заголовок:</b> {Title ?? "<i>Без названия</i>"}");
+
+        if (!string.IsNullOrWhiteSpace(Description))
+        {
+            sb.AppendLine($"<b>📝 Описание:</b> {Description}");
+        }
+
+        sb.AppendLine();
+        
+        return sb.ToString();
     }
 }

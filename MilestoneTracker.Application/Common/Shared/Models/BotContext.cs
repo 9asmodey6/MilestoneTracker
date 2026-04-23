@@ -17,6 +17,7 @@ public record BotContext
     public string? PhotoFileId { get; init; }
     public bool HasVideo { get; init; }
     public string? VideoFileId { get; init; }
+    public string? MediaGroupId { get; init; }
     public string? Username { get; init; }
     public string? FirstName { get; init; }
 
@@ -33,6 +34,7 @@ public record BotContext
                 PhotoFileId = update.Message.Photo?.LastOrDefault()?.FileId,
                 HasVideo = update.Message.Video != null,
                 VideoFileId = update.Message.Video?.FileId,
+                MediaGroupId = update.Message.MediaGroupId,
                 Username = update.Message.From?.Username,
                 FirstName = update.Message.From?.FirstName,
                 CallbackQueryId = null
