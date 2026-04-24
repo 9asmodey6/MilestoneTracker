@@ -1,10 +1,10 @@
 ﻿namespace MilestoneTracker.Infrastructure;
 
-using Application.Common.Commands.State;
 using Application.Common.Features.Children.AddChild;
 using Application.Common.Interfaces;
-using Application.Common.Shared.Abstractions.Interfaces;
 using Application.Common.Shared.Interfaces;
+using Application.Common.Shared.Interfaces.Repositories;
+using Application.Common.Shared.State;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -44,6 +44,7 @@ public static class DependencyInjection
         
         services.AddScoped<IParentRepository, ParentRepository>();
         services.AddScoped<IUserStateRepository, UserStateRepository>();
+        services.AddScoped<IMilestoneRepository, MilestoneRepository>();
         
         services.AddScoped<IUserStateService, UserStateService>();
         services.AddScoped<ITelegramMessageService, TelegramMessageService>();

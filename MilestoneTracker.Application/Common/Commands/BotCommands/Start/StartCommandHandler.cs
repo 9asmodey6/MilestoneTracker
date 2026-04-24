@@ -18,7 +18,7 @@ public class StartCommandHandler(
     {
         logger.LogInformation("Processing /start command for ChatId: {ChatId}", request.ChatId);
 
-        var existingParent = await parentRepository.GetAsync(request.ChatId, ct);
+        var existingParent = await parentRepository.GetWithChildrenAsync(request.ChatId, ct);
 
         if (existingParent != null)
         {

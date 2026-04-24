@@ -11,9 +11,9 @@ using Infrastructure.Models;
 using Interfaces;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using Shared.Abstractions.Interfaces;
 using Shared.Bot.Keyboards;
 using Shared.Interfaces;
+using Shared.State;
 using Telegram.Bot;
 using Telegram.Bot.Types.ReplyMarkups;
 
@@ -189,7 +189,7 @@ public class ProcessChildStepHandler(
             return;
         }
 
-        var parent = await parentRepository.GetAsync(context.ChatId, ct);
+        var parent = await parentRepository.GetWithChildrenAsync(context.ChatId, ct);
         if (parent == null)
         {
             logger.LogError("Parent not found for ChatId: {ChatId}", context.ChatId);

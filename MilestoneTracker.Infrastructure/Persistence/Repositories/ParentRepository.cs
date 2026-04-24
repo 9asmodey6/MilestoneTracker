@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 public class ParentRepository(
     IAppDbContext dbContext) : IParentRepository
 {
-    public async Task<Parent?> GetAsync(long chatId, CancellationToken ct)
+    public async Task<Parent?> GetWithChildrenAsync(long chatId, CancellationToken ct)
     {
         return await dbContext.Parents
             .AsNoTracking()
@@ -44,7 +44,7 @@ public class ParentRepository(
             .ToListAsync(ct);
     }
 
-    public Task<Child?> GetByIdAsync(int childId, CancellationToken ct)
+    public Task<Child?> GetChildrenByIdAsync(int childId, CancellationToken ct)
     {
         return dbContext.Children.FirstOrDefaultAsync(c => c.Id == childId, ct);
     }

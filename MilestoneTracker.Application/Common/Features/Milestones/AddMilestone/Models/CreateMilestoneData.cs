@@ -1,15 +1,18 @@
-﻿namespace MilestoneTracker.Application.Common.Features.Milestones.AddMilestone;
+﻿namespace MilestoneTracker.Application.Common.Features.Milestones.AddMilestone.Models;
 
-using Domain.Enums;
+using MilestoneTracker.Domain.Enums;
 using Telegram.Bot.Types;
 
 public record CreateMilestoneData(
+    long? ChatId = null,
+    int? CreatorId = null,
     int? ChildId = null,
     string? ChildName = null,
     MilestoneCategory? Category = null,
     DateOnly? Date = null,
     string? Title = null,
     string? Description = null,
+    bool IsEditing = false,
     List<IAlbumInputMedia>? MediaGroup = null
 )
 {

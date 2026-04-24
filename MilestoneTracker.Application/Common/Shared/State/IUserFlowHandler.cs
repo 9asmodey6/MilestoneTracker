@@ -1,9 +1,8 @@
-﻿namespace MilestoneTracker.Application.Common.Shared.Abstractions.Interfaces;
+﻿namespace MilestoneTracker.Application.Common.Shared.State;
 
 using MilestoneTracker.Domain.Entities;
 using MilestoneTracker.Domain.Enums;
 using MilestoneTracker.Infrastructure.Models;
-using Telegram.Bot.Types;
 
 public interface IUserFlowHandler
 {

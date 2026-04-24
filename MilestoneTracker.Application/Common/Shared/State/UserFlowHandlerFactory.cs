@@ -1,8 +1,6 @@
-﻿namespace MilestoneTracker.Application.Common.Commands.State;
+﻿namespace MilestoneTracker.Application.Common.Shared.State;
 
-using Domain.Enums;
-using Interfaces;
-using Shared.Abstractions.Interfaces;
+using MilestoneTracker.Domain.Enums;
 
 public class UserFlowHandlerFactory
 {
