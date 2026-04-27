@@ -1,4 +1,4 @@
-﻿namespace MilestoneTracker.Application.Common.Features.Milestones.AddMilestone.Steps;
+namespace MilestoneTracker.Application.Common.Features.Milestones.AddMilestone.Steps;
 
 using Constants;
 using Domain.Entities;
@@ -113,44 +113,17 @@ public class ConfirmingStepHandler(
         return new StepResult<CreateMilestoneData>(Step, data);
     }
     
-    private List<MilestoneMedia> MapMedia(List<IAlbumInputMedia>? telegramMedia)
+    private List<MilestoneMedia> MapMedia(List<MediaItem>? mediaItems)
     {
-        if (telegramMedia == null) return new();
+        if (mediaItems == null) return new();
 
-        return telegramMedia.Select(m => new MilestoneMedia
+        return mediaItems.Select(m => new MilestoneMedia
         {
             Id = Guid.NewGuid(),
             UploadedAt = DateTime.UtcNow,
-            
-            Type = m switch
-            {
-                InputMediaPhoto => MediaType.Photo,
-                InputMediaVideo => MediaType.Video,
-                _ => throw new InvalidOperationException("Unknown media type")
-            },
-            
-            FileId = m switch
-            {
-                InputMediaPhoto photo => photo.Media switch 
-                {
-                    InputFileId f => f.Id!,
-                    _ => throw new InvalidOperationException("Photo media is not an InputFileId")
-                },
-                InputMediaVideo video => video.Media switch
-                {
-                    InputFileId f => f.Id!,
-                    _ => throw new InvalidOperationException("Video media is not an InputFileId")
-                },
-                _ => throw new InvalidOperationException("Unknown media type in mapping")
-            },
-            
-            
-            Caption = m switch
-            {
-                InputMediaPhoto p => p.Caption,
-                InputMediaVideo v => v.Caption,
-                _ => null
-            }
+            Type = m.Type,
+            FileId = m.FileId,
+            Caption = m.Caption
         }).ToList();
     }
 }

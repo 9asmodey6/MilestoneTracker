@@ -1,10 +1,10 @@
-﻿namespace MilestoneTracker.Application.Common.Features.Milestones.AddMilestone;
+namespace MilestoneTracker.Application.Common.Features.Milestones.AddMilestone;
 
 using Interfaces;
 using Models;
 using Shared.Bot.Keyboards;
 using Shared.Interfaces.Services;
-using Telegram.Bot.Types;
+using MilestoneTracker.Domain.Enums;
 
 public class MilestonePreviewService(ITelegramMessageService messageService) : IMilestonePreviewService
 {
@@ -16,47 +16,46 @@ public class MilestonePreviewService(ITelegramMessageService messageService) : I
         {
             await messageService.SendMessageWithInlineKeyboardAsync(
                 chatId: chatId,
-                "Хочешь что то изменить? Если нет - нажми кнопку 'Сохранить'." + summary,
+                summary + "\n\nХочешь что то изменить? Если нет - нажми кнопку 'Сохранить'.",
                 BotKeyboards.MilestoneConfirmationKeyboard(),
                 ct);
+            return;
         }
 
         if (data.MediaCount == 1)
         {
             var media = data.MediaGroup![0];
-            if (media is InputMediaPhoto photo)
+            if (media.Type == MediaType.Photo)
             {
                 await messageService.SendPhotoAsync(
                     chatId,
-                    ((InputFileId)photo.Media).Id,
+                    media.FileId,
                     summary,
                     ct);
-                await messageService.SendMessageWithInlineKeyboardAsync(
-                    chatId: chatId,
-                    "Хочешь что то изменить? Если нет - нажми кнопку 'Сохранить'.",
-                    BotKeyboards.MilestoneConfirmationKeyboard(),
-                    ct);
-                return;
             }
-            else if (media is InputMediaVideo video)
+            else if (media.Type == MediaType.Video)
             {
-                await messageService.SendPhotoAsync(
+                await messageService.SendVideoAsync(
                     chatId,
-                    ((InputFileId)video.Media).Id,
+                    media.FileId,
                     summary,
                     ct);
-                await messageService.SendMessageWithInlineKeyboardAsync(
-                    chatId: chatId,
-                    "Хочешь что то изменить? Если нет - нажми кнопку 'Сохранить'.",
-                    BotKeyboards.MilestoneConfirmationKeyboard(),
-                    ct);
-                return;
             }
 
-            data.AddCaption(summary);
+            await messageService.SendMessageWithInlineKeyboardAsync(
+                chatId: chatId,
+                "Хочешь что то изменить? Если нет - нажми кнопку 'Сохранить'.",
+                BotKeyboards.MilestoneConfirmationKeyboard(),
+                ct);
+            return;
+        }
+
+        if (data.MediaCount > 1)
+        {
+            var updatedData = data.AddCaption(summary);
             await messageService.SendMediaGroupAsync(
                 chatId,
-                data.MediaGroup,
+                updatedData.MediaGroup!,
                 ct);
 
             await messageService.SendMessageWithInlineKeyboardAsync(

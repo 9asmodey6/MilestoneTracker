@@ -1,10 +1,12 @@
-﻿namespace MilestoneTracker.Infrastructure.Services;
+namespace MilestoneTracker.Infrastructure.Services;
 
 using Application.Common.Interfaces;
+using Domain.Enums;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
+using MilestoneTracker.Application.Common.Shared.Models;
 
 public class TelegramMessageService(
     ITelegramBotClient botClient,
@@ -135,14 +137,21 @@ public class TelegramMessageService(
 
     public async Task SendMediaGroupAsync(
         long chatId,
-        IEnumerable<IAlbumInputMedia> media,
+        IEnumerable<MediaItem> media,
         CancellationToken ct = default)
     {
         try
         {
+            var telegramMedia = media.Select(m => m.Type switch
+            {
+                MediaType.Photo => (IAlbumInputMedia)new InputMediaPhoto(InputFile.FromFileId(m.FileId)) { Caption = m.Caption, ParseMode = Telegram.Bot.Types.Enums.ParseMode.Html },
+                MediaType.Video => new InputMediaVideo(InputFile.FromFileId(m.FileId)) { Caption = m.Caption, ParseMode = Telegram.Bot.Types.Enums.ParseMode.Html },
+                _ => throw new ArgumentOutOfRangeException()
+            });
+
             await botClient.SendMediaGroup(
                 chatId: chatId,
-                media: media,
+                media: telegramMedia,
                 cancellationToken: ct
             );
 

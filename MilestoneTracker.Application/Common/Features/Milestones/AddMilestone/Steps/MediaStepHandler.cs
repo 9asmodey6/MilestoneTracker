@@ -67,11 +67,11 @@ public class MediaStepHandler(
 
             if (!string.IsNullOrEmpty(context.MediaGroupId))
             {
-                await Task.Delay(800, ct);
+                await Task.Delay(2000, ct);
                 var checkState = await userStateService.GetAsync(context.ChatId, ct);
                 var checkData = JsonSerializer.Deserialize<CreateMilestoneData>(checkState?.StateData ?? "{}");
                 if (checkData?.MediaCount > latestData.MediaCount)
-                    return new StepResult<CreateMilestoneData>(Step, latestData);
+                    return new StepResult<CreateMilestoneData>(Step, null);
             }
 
             await messageService.SendMessageWithInlineKeyboardAsync(context.ChatId,
@@ -79,7 +79,7 @@ public class MediaStepHandler(
                 BotKeyboards.MediaUploadKeyboard(latestData.MediaCount), ct);
         }
 
-        return new StepResult<CreateMilestoneData>(Step, latestData);
+        return new StepResult<CreateMilestoneData>(Step, null);
     }
 
 

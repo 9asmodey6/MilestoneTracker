@@ -1,4 +1,4 @@
-﻿namespace MilestoneTracker.Infrastructure.Persistence.Repositories;
+namespace MilestoneTracker.Infrastructure.Persistence.Repositories;
 
 using Application.Common.Interfaces;
 using Domain.Entities;
@@ -10,7 +10,9 @@ public class UserStateRepository(
 {
     public async Task<UserState?> GetByChatIdAsync(long chatId, CancellationToken ct)
     {
-        var state = await dbContext.UserStates.FirstOrDefaultAsync(s => s.ChatId == chatId, ct);
+        var state = await dbContext.UserStates
+            .AsNoTracking()
+            .FirstOrDefaultAsync(s => s.ChatId == chatId, ct);
         return state;
     }
 

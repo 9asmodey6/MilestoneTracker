@@ -1,7 +1,7 @@
-﻿namespace MilestoneTracker.Application.Common.Features.Milestones.AddMilestone.Models;
+namespace MilestoneTracker.Application.Common.Features.Milestones.AddMilestone.Models;
 
 using MilestoneTracker.Domain.Enums;
-using Telegram.Bot.Types;
+using MilestoneTracker.Application.Common.Shared.Models;
 
 public record CreateMilestoneData(
     long? ChatId = null,
@@ -13,20 +13,20 @@ public record CreateMilestoneData(
     string? Title = null,
     string? Description = null,
     bool IsEditing = false,
-    List<IAlbumInputMedia>? MediaGroup = null
+    List<MediaItem>? MediaGroup = null
 )
 {
     public CreateMilestoneData AddPhoto(string photoFileId)
     {
-        List<IAlbumInputMedia> updatedList =
-            [..(MediaGroup ?? []), new InputMediaPhoto(InputFile.FromFileId(photoFileId))];
+        List<MediaItem> updatedList =
+            [..(MediaGroup ?? []), new MediaItem(photoFileId, MediaType.Photo)];
         return this with { MediaGroup = updatedList };
     }
 
     public CreateMilestoneData AddVideo(string videoFileId)
     {
-        List<IAlbumInputMedia> updatedList =
-            [..(MediaGroup ?? []), new InputMediaVideo(InputFile.FromFileId(videoFileId))];
+        List<MediaItem> updatedList =
+            [..(MediaGroup ?? []), new MediaItem(videoFileId, MediaType.Video)];
         return this with { MediaGroup = updatedList };
     }
 
@@ -35,22 +35,9 @@ public record CreateMilestoneData(
         if (MediaGroup == null || MediaGroup.Count == 0)
             return this;
 
-        IAlbumInputMedia updatedFirst = MediaGroup[0] switch
-        {
-            InputMediaPhoto p => new InputMediaPhoto(p.Media)
-            {
-                Caption = caption,
-                ParseMode = Telegram.Bot.Types.Enums.ParseMode.Html
-            },
-            InputMediaVideo v => new InputMediaVideo(v.Media)
-            {
-                Caption = caption,
-                ParseMode = Telegram.Bot.Types.Enums.ParseMode.Html
-            },
-            _ => MediaGroup[0]
-        };
+        MediaItem updatedFirst = MediaGroup[0] with { Caption = caption };
 
-        List<IAlbumInputMedia> updatedList = [updatedFirst, .. MediaGroup.Skip(1)];
+        List<MediaItem> updatedList = [updatedFirst, .. MediaGroup.Skip(1)];
 
         return this with { MediaGroup = updatedList };
     }

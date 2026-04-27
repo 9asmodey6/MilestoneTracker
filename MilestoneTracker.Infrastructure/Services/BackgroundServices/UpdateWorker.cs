@@ -1,4 +1,4 @@
-﻿namespace MilestoneTracker.Infrastructure.Services.BackgroundServices;
+namespace MilestoneTracker.Infrastructure.Services.BackgroundServices;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -17,17 +17,22 @@ public class UpdateWorker(
 
         await foreach (var update in queue.ReadAllAsync(stoppingToken))
         {
-            try
-            {
-                using var scope = scopeFactory.CreateScope();
-                var handler = scope.ServiceProvider.GetRequiredService<UpdateHandler>();
-                
-                await  handler.HandleUpdateAsync(update, stoppingToken);
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Failed to process background update {UpdateId}", update.Id);
-            }
+            _ = ProcessUpdateAsync(update, stoppingToken);
+        }
+    }
+
+    private async Task ProcessUpdateAsync(Update update, CancellationToken stoppingToken)
+    {
+        try
+        {
+            using var scope = scopeFactory.CreateScope();
+            var handler = scope.ServiceProvider.GetRequiredService<UpdateHandler>();
+            
+            await handler.HandleUpdateAsync(update, stoppingToken);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to process background update {UpdateId}", update.Id);
         }
     }
 }

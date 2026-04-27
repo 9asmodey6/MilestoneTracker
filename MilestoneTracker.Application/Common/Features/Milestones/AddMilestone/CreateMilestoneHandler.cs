@@ -1,4 +1,4 @@
-﻿namespace MilestoneTracker.Application.Common.Features.Milestones.AddMilestone;
+namespace MilestoneTracker.Application.Common.Features.Milestones.AddMilestone;
 
 using System.Text;
 using System.Text.Json;
@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using Models;
 using Shared.Bot.Keyboards;
 using Shared.Interfaces.Repositories;
+using Shared.Models;
 using Telegram.Bot.Types;
 
 public class CreateMilestoneHandler(
@@ -36,7 +37,7 @@ public class CreateMilestoneHandler(
                 ChildId = command.ChildId,
                 Description = command.Description,
                 CreatorId = command.CreatorId,
-                OccurredAt = command.OccuredAt.ToDateTime(TimeOnly.MinValue),
+                OccurredAt = DateTime.SpecifyKind(command.OccuredAt.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc),
                 CreatedAt = DateTime.UtcNow,
                 MediaFiles = command.MediaFiles ?? new List<MilestoneMedia>(),
             };
@@ -95,30 +96,12 @@ public class CreateMilestoneHandler(
         return milestoneId;
     }
     
-    private List<IAlbumInputMedia> MapToTelegramMedia(List<MilestoneMedia>? domainMedia)
+    private List<MediaItem> MapToTelegramMedia(List<MilestoneMedia>? domainMedia)
     {
         if (domainMedia == null || domainMedia.Count == 0) 
-            return new List<IAlbumInputMedia>();
+            return new List<MediaItem>();
 
-        return domainMedia.Select(m => 
-        {
-            var inputFile = InputFile.FromFileId(m.FileId);
-
-            return m.Type switch
-            {
-                MediaType.Photo => (IAlbumInputMedia)new InputMediaPhoto(inputFile)
-                {
-                    Caption = m.Caption,
-                    ParseMode = Telegram.Bot.Types.Enums.ParseMode.Html
-                },
-                MediaType.Video => (IAlbumInputMedia)new InputMediaVideo(inputFile)
-                {
-                    Caption = m.Caption,
-                    ParseMode = Telegram.Bot.Types.Enums.ParseMode.Html
-                },
-                _ => throw new InvalidOperationException($"Тип медиа {m.Type} не поддерживается для отправки")
-            };
-        }).ToList();
+        return domainMedia.Select(m => new MediaItem(m.FileId, m.Type, m.Caption)).ToList();
     }
 }
 

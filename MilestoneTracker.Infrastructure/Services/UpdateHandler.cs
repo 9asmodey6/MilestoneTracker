@@ -1,4 +1,4 @@
-﻿namespace MilestoneTracker.Infrastructure.Services;
+namespace MilestoneTracker.Infrastructure.Services;
 
 using Application.Common.Commands.Bot.Start;
 using Application.Common.Commands.BotCommands.Cancel;
@@ -35,13 +35,17 @@ public class UpdateHandler(
         if (context.IsCallback)
         {
             await botClient.AnswerCallbackQuery(context.CallbackQueryId!, cancellationToken: ct);
-            await HandleCallbackQueryAsync(context, ct);
-            return;
         }
 
         if (context.Text?.StartsWith('/') ?? false)
         {
             await HandleCommandAsync(context, ct);
+            return;
+        }
+
+        if (context.IsCallback)
+        {
+            await HandleCallbackQueryAsync(context, ct);
             return;
         }
 

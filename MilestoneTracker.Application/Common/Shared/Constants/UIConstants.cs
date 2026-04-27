@@ -11,7 +11,7 @@ public static class UiConstants
         public const string Help = "📋 Помощь";
     }
 
-    public static class SlashCommands
+    public static class SlashCommandsву
     {
         public const string Start = "start";
         public const string Help = "help";

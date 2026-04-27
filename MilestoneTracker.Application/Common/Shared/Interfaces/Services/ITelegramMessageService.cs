@@ -1,4 +1,6 @@
-﻿namespace MilestoneTracker.Application.Common.Interfaces;
+using MilestoneTracker.Application.Common.Shared.Models;
+
+namespace MilestoneTracker.Application.Common.Interfaces;
 
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -44,6 +46,6 @@ public interface ITelegramMessageService
     
     Task SendMediaGroupAsync(
         long chatId, 
-        IEnumerable<IAlbumInputMedia> media, 
+        IEnumerable<MediaItem> media, 
         CancellationToken ct = default);
 }
