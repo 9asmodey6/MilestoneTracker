@@ -1,4 +1,4 @@
-﻿namespace MilestoneTracker.Application.Common.Features.Milestones.AddMilestone.Steps;
+namespace MilestoneTracker.Application.Common.Features.Milestones.AddMilestone.Steps;
 
 using Domain.Enums;
 using Infrastructure.Models;
@@ -22,7 +22,7 @@ public class StartedStepHandler(
     public async Task<StepResult<CreateMilestoneData>> HandleAsync(BotContext context, CreateMilestoneData data,
         CancellationToken ct)
     {
-        logger.LogInformation("Started milestone adding step for chat {ChatId}",
+        logger.LogDebug("Started milestone adding step for chat {ChatId}",
             context.ChatId);
 
         var parent = await parentRepository.GetWithChildrenAsync(context.ChatId, ct);
@@ -35,7 +35,7 @@ public class StartedStepHandler(
 
         if (parent.Children.Count == 0)
         {
-            logger.LogError("Children not found for chat {ChatId}", context.ChatId);
+            logger.LogWarning("Children not found for chat {ChatId}", context.ChatId);
             await messageService.SendMessageWithInlineKeyboardAsync(
                 context.ChatId,
                 "<b>В базе пока нет ваших детей.</b>\n\nНажмите кнопку ниже, чтобы добавить первого ребенка и начать отслеживать его достижения! 👇",

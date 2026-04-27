@@ -1,4 +1,4 @@
-﻿namespace MilestoneTracker.Application.Common.Constants;
+namespace MilestoneTracker.Application.Common.Constants;
 
 public static class UiConstants
 {
@@ -27,6 +27,14 @@ public static class UiConstants
         public const string SelectChild = "select_child";
 
         public const string SelectCategory = "select_category";
+
+        public static class GetMilestones
+        {
+            public const string ModeLatest = "vm_mode_latest";
+            public const string ModeCategory = "vm_mode_cat";
+            public const string ModeDate = "vm_mode_date";
+            public const string BackToList = "vm_back_list";
+        }
 
         public static class EditMilestone
         {

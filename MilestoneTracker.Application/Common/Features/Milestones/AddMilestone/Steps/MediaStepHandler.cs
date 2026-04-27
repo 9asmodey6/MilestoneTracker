@@ -1,4 +1,4 @@
-﻿namespace MilestoneTracker.Application.Common.Features.Milestones.AddMilestone.Steps;
+namespace MilestoneTracker.Application.Common.Features.Milestones.AddMilestone.Steps;
 
 using System.Text.Json;
 using AsyncKeyedLock;
@@ -26,7 +26,7 @@ public class MediaStepHandler(
     public async Task<StepResult<CreateMilestoneData>> HandleAsync(BotContext context, CreateMilestoneData data,
         CancellationToken ct)
     {
-        logger.LogInformation("Processing title for chat {ChatId}, preparing for final step",
+        logger.LogDebug("Processing title for chat {ChatId}, preparing for final step",
             context.ChatId);
 
         var latestData = data;

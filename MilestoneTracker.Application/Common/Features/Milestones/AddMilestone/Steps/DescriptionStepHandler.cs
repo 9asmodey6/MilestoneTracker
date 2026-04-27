@@ -1,4 +1,4 @@
-﻿namespace MilestoneTracker.Application.Common.Features.Milestones.AddMilestone.Steps;
+namespace MilestoneTracker.Application.Common.Features.Milestones.AddMilestone.Steps;
 
 using Domain.Enums;
 using Infrastructure.Models;
@@ -20,7 +20,7 @@ public class DescriptionStepHandler(
     public async Task<StepResult<CreateMilestoneData>> HandleAsync(BotContext context, CreateMilestoneData data,
         CancellationToken ct)
     {
-        logger.LogInformation("Processing description for chat {ChatId}, preparing for media upload",
+        logger.LogDebug("Processing description for chat {ChatId}, preparing for media upload",
             context.ChatId);
 
         if (string.IsNullOrWhiteSpace(context.Text))

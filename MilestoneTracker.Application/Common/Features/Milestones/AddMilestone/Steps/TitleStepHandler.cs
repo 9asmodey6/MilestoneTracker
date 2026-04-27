@@ -1,4 +1,4 @@
-﻿namespace MilestoneTracker.Application.Common.Features.Milestones.AddMilestone.Steps;
+namespace MilestoneTracker.Application.Common.Features.Milestones.AddMilestone.Steps;
 
 using Constants;
 using Domain.Enums;
@@ -21,7 +21,7 @@ public class TitleStepHandler(
     public async Task<StepResult<CreateMilestoneData>> HandleAsync(BotContext context, CreateMilestoneData data,
         CancellationToken ct)
     {
-        logger.LogInformation("Processing title for chat {ChatId}, preparing for description entering",
+        logger.LogDebug("Processing title for chat {ChatId}, preparing for description entering",
             context.ChatId);
 
         bool isSkipped = context.IsCallback

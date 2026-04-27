@@ -1,8 +1,9 @@
-﻿namespace MilestoneTracker.Application.Common.Shared.Bot.Keyboards;
+namespace MilestoneTracker.Application.Common.Shared.Bot.Keyboards;
 
 using Domain.Entities;
 using Domain.Enums;
 using Constants;
+using Domain.Entities.Milestones;
 using Telegram.Bot.Types.ReplyMarkups;
 
 public static class BotKeyboards
@@ -113,7 +114,7 @@ public static class BotKeyboards
         });
     }
 
-    public static InlineKeyboardMarkup MilestoneConfirmationKeyboard()
+        public static InlineKeyboardMarkup MilestoneConfirmationKeyboard()
     {
         return new InlineKeyboardMarkup(new[]
         {
@@ -157,5 +158,76 @@ public static class BotKeyboards
                 InlineKeyboardButton.WithCallbackData("❌ Отменить", "/cancel")
             }
         });
+    }
+
+    public static InlineKeyboardMarkup ViewMilestonesModeKeyboard()
+    {
+        return new InlineKeyboardMarkup(new[]
+        {
+            new[]
+            {
+                InlineKeyboardButton.WithCallbackData(
+                    "📅 По хронологии (Последние)", 
+                    UiConstants.CallbackQueries.GetMilestones.ModeLatest)
+            },
+            new[]
+            {
+                InlineKeyboardButton.WithCallbackData(
+                    "🗂 По категориям", 
+                    UiConstants.CallbackQueries.GetMilestones.ModeCategory)
+            },
+            new[]
+            {
+                InlineKeyboardButton.WithCallbackData(
+                    "📆 Конкретная дата", 
+                    UiConstants.CallbackQueries.GetMilestones.ModeDate)
+            }
+        });
+    }
+
+    public static InlineKeyboardMarkup PaginationKeyboard(int currentPage, int totalPages, List<Milestone> itemsOnPage)
+    {
+        var buttons = new List<InlineKeyboardButton[]>();
+        
+        var itemButtons = new List<InlineKeyboardButton>();
+        for (int i = 0; i < itemsOnPage.Count; i++)
+        {
+            itemButtons.Add(InlineKeyboardButton.WithCallbackData(
+                text: (i + 1).ToString(),
+                callbackData: $"vm_item_{itemsOnPage[i].Id}"));
+        }
+        
+        if (itemButtons.Any())
+        {
+            buttons.Add(itemButtons.ToArray());
+        }
+        
+        var navButtons = new List<InlineKeyboardButton>();
+        
+        if (currentPage > 1)
+        {
+            navButtons.Add(InlineKeyboardButton.WithCallbackData(
+                "⬅️ Назад", $"vm_page_{currentPage - 1}"));
+        }
+        
+        if (currentPage < totalPages)
+        {
+            navButtons.Add(InlineKeyboardButton.WithCallbackData(
+                "Вперед ➡️", $"vm_page_{currentPage + 1}"));
+        }
+
+        if (navButtons.Any())
+        {
+            buttons.Add(navButtons.ToArray());
+        }
+        
+        buttons.Add(new[]
+        {
+            InlineKeyboardButton.WithCallbackData(
+                "🔙 К выбору режима", 
+                UiConstants.CallbackQueries.GetMilestones.BackToList)
+        });
+
+        return new InlineKeyboardMarkup(buttons);
     }
 }

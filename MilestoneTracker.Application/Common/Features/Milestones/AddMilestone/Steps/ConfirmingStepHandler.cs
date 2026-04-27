@@ -26,7 +26,7 @@ public class ConfirmingStepHandler(
     public async Task<StepResult<CreateMilestoneData>> HandleAsync(BotContext context, CreateMilestoneData data,
         CancellationToken ct)
     {
-        logger.LogInformation("Processing title for chat {ChatId}, preparing for final step",
+        logger.LogDebug("Processing title for chat {ChatId}, preparing for final step",
             context.ChatId);
 
         if (!context.IsCallback)

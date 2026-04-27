@@ -1,4 +1,4 @@
-﻿namespace MilestoneTracker.Application.Common.Features.Milestones.AddMilestone.Steps;
+namespace MilestoneTracker.Application.Common.Features.Milestones.AddMilestone.Steps;
 
 using Domain.Enums;
 using Infrastructure.Models;
@@ -20,7 +20,7 @@ public class DateStepHandler(
     public async Task<StepResult<CreateMilestoneData>> HandleAsync(BotContext context, CreateMilestoneData data,
         CancellationToken ct)
     {
-        logger.LogInformation("Processing date for chat {ChatId}, preparing for title entering",
+        logger.LogDebug("Processing date for chat {ChatId}, preparing for title entering",
             context.ChatId);
 
         DateOnly parsedDate = new DateOnly();

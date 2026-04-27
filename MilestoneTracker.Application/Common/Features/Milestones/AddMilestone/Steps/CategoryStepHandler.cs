@@ -1,4 +1,4 @@
-﻿namespace MilestoneTracker.Application.Common.Features.Milestones.AddMilestone.Steps;
+namespace MilestoneTracker.Application.Common.Features.Milestones.AddMilestone.Steps;
 
 using Domain.Enums;
 using Infrastructure.Models;
@@ -21,7 +21,7 @@ public class CategoryStepHandler(
     public async Task<StepResult<CreateMilestoneData>> HandleAsync(BotContext context, CreateMilestoneData data,
         CancellationToken ct)
     {
-        logger.LogInformation("Processing category for chat {ChatId}, preparing for date entering",
+        logger.LogDebug("Processing category for chat {ChatId}, preparing for date entering",
             context.ChatId);
 
         if (!int.TryParse(context.CallbackData, out var selectedCategoryId)

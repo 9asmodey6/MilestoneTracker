@@ -1,4 +1,4 @@
-﻿namespace MilestoneTracker.Application.Common.Features.Children.AddChild;
+namespace MilestoneTracker.Application.Common.Features.Children.AddChild;
 
 using System.Text;
 using System.Text.Json;
@@ -86,7 +86,7 @@ public class ProcessChildStepHandler(
 
     private async Task HandleStartedStep(BotContext context, CreateChildData data, CancellationToken ct)
     {
-        logger.LogInformation("Started child adding step for chat {ChatId}, waiting for name entering",
+        logger.LogDebug("Started child adding step for chat {ChatId}, waiting for name entering",
             context.ChatId);
 
         await messageService.SendTextMessageAsync(
@@ -104,7 +104,7 @@ public class ProcessChildStepHandler(
 
     private async Task HandleNameStep(BotContext context, CreateChildData data, CancellationToken ct)
     {
-        logger.LogInformation("Started child adding step for chat {ChatId}, waiting for age entering",
+        logger.LogDebug("Started child adding step for chat {ChatId}, waiting for age entering",
             context.ChatId);
 
         var updatedData = data with { Name = context.Text };
@@ -123,7 +123,7 @@ public class ProcessChildStepHandler(
 
     private async Task HandleBirthdayStep(BotContext context, CreateChildData data, CancellationToken ct)
     {
-        logger.LogInformation("Started child adding step for chat {ChatId}, waiting for photo entering",
+        logger.LogDebug("Started child adding step for chat {ChatId}, waiting for photo entering",
             context.ChatId);
 
         var birthDate = dateParser.ParseDate(context.Text!);
@@ -159,7 +159,7 @@ public class ProcessChildStepHandler(
 
     private async Task HandlePhotoStep(BotContext context, CreateChildData data, CancellationToken ct)
     {
-        logger.LogInformation("Started child adding step for chat {ChatId}, waiting for photo",
+        logger.LogDebug("Started child adding step for chat {ChatId}, waiting for photo",
             context.ChatId);
 
         bool isSkipped = context.IsCallback

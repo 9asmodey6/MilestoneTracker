@@ -20,4 +20,11 @@ public enum UserStateType
     AddMilestoneUploadingMedia = 26,
     AddMilestoneConfirming = 27,
     
+    
+    GetMilestoneSelectingChild = 30,
+    GetMilestoneSelectingMode = 31,
+    GetMilestoneSelectingCategory = 32,
+    GetMilestoneSelectingDate = 33,
+    GetMilestoneList = 34,
+    GetMilestoneViewItem = 35,
 }
