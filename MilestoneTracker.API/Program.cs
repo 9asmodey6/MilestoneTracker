@@ -3,6 +3,7 @@ using MilestoneTracker.Infrastructure;
 using MilestoneTracker.Infrastructure.Options;
 using Serilog;
 using Telegram.Bot;
+using MilestoneTracker.API.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +28,8 @@ app.UseSerilogRequestLogging(options =>
 
 if (app.Environment.IsDevelopment())
 {
+    
+    app.ApplyMigrations();
     app.UseSwagger();
     app.UseSwaggerUI();
 }

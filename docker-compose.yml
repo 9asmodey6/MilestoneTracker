@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   milestone-tracker-api:
     build:
@@ -14,11 +12,12 @@ services:
       - "8080:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - Telegram_BotToken=${BOT_TOKEN}
-      - Telegram_WebhookUrl=${WEBHOOK_URL}
-      - Database_ConnectionString=${DB_STRING}
-    depends_on:
-      - postgres
+      - Telegram__BotToken=${BOT_TOKEN}
+      - Telegram__WebhookUrl=${WEBHOOK_URL}
+      - Database__ConnectionString=${DB_STRING}
+      - Logging__LogLevel__Default=Debug
+      - Logging__LogLevel__Microsoft.AspNetCore=Debug
+      - Logging__LogLevel__MilestoneTracker=Debug
     networks:
       - milestone_network
 
