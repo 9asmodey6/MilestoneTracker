@@ -6,14 +6,17 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: milestone_tracker_api
+    depends_on:
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
     ports:
       - "8080:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=milestones;Username=postgres;Password=postgres
-      # Раскомментируйте и добавьте токен вашего бота для запуска в Docker:
-      # - Telegram__BotToken=ВАШ_ТОКЕН_ЗДЕСЬ
+      - Telegram_BotToken=${BOT_TOKEN}
+      - Telegram_WebhookUrl=${WEBHOOK_URL}
+      - Database_ConnectionString=${DB_STRING}
     depends_on:
       - postgres
     networks:
@@ -31,6 +34,11 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d milestones" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     networks:
       - milestone_network
 
