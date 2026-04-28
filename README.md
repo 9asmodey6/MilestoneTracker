@@ -1,15 +1,39 @@
-# Milestone Tracker
+# Milestone Tracker Bot 🍼✨
 
-A personal Telegram Bot designed to track and store significant life events and achievements.
+A modern Telegram bot designed to help parents track and preserve their children's important milestones. Built with a focus on clean code, performance, and maintainability.
 
-## Features:
-- 🚀 **Event Logging:** Quickly add milestones (first words, first steps, etc.) via Telegram.
-- 📂 **Categorization:** Organize events by types (Milestones, Health, Humor).
-- 🏗️ **Clean Architecture:** Separated Domain, Infrastructure, and API layers.
-- ⚡ **Webhooks:** Fast and efficient communication with Telegram API.
+## 🏗 Architecture & Design Patterns
 
-## Tech Stack:
-- **Backend:** .NET 10 / ASP.NET Core Web API
-- **ORM:** Dapper / EF Core
-- **Database:** PostgreSQL
-- **Logging:** Serilog + Seq
+The project follows a hybrid architectural approach to combine the best of both worlds:
+
+*   **Clean Architecture**: Separation of concerns across Domain, Application, and Infrastructure layers.
+*   **Vertical Slice Architecture (VSA)**: Inside the features folder, each use case (like "Add Milestone" or "Get Children") is encapsulated in its own slice, making it easier to navigate and modify specific logic without affecting the rest of the system.
+*   **State Machine Flow**: A robust state-based engine handles complex multi-step interactions (e.g., a wizard-like flow for adding a milestone with photos, dates, and descriptions).
+*   **Handler Factory**: A dynamic factory pattern is used to resolve the correct state handler for every incoming update, ensuring the main logic remains clean and scalable.
+
+## 🚀 Performance Features
+
+*   **Instant Response (Non-blocking)**: The bot utilizes an **internal update queue** and a **Background Worker**. This allows the Webhook to respond to Telegram servers in approximately **1.5 ms**, while the actual processing happens asynchronously.
+*   **MediatR**: Used to decouple request handling from the API/Infrastructure, promoting a "thin controller" approach.
+*   **Stateless Navigation**: Milestone retrieval uses DTO-based state management, minimizing unnecessary database roundtrips.
+
+## 🛠 Tech Stack
+
+- **Backend**: .NET 8
+- **Database**: PostgreSQL with Entity Framework Core
+- **Bot API**: Telegram.Bot library
+- **Messaging**: MediatR
+- **Logging**: Serilog
+- **Locking**: AsyncKeyedLock (for thread-safe chat processing)
+
+## 🚧 Project Status: Work in Progress
+
+> [!NOTE]
+> This project is currently under active development. Some flows are incomplete or simplified.
+
+*   **Language**: The bot's UI is currently in **Russian**, as it's optimized for personal/local use.
+*   **Flows**: While the core "Add" and "View" flows are functional, advanced features like editing/deleting milestones are still in the roadmap.
+*   **Goal**: The primary goal is to create a reliable and fast personal tool for capturing memories that last forever.
+
+---
+*Created with ❤️ for personal use and learning.*
