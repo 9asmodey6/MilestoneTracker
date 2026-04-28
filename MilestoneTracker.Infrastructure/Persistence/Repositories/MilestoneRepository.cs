@@ -1,4 +1,4 @@
-﻿namespace MilestoneTracker.Infrastructure.Persistence.Repositories;
+namespace MilestoneTracker.Infrastructure.Persistence.Repositories;
 
 using Application.Common.Interfaces;
 using Application.Common.Shared.Interfaces.Repositories;
@@ -46,5 +46,12 @@ public class MilestoneRepository(
             .ToListAsync(ct);
         
         return (items, totalCount);
+    }
+
+    public async Task<Milestone?> GetByIdAsync(int id, CancellationToken ct = default)
+    {
+        return await dbContext.Milestones
+            .Include(m => m.MediaFiles)
+            .FirstOrDefaultAsync(m => m.Id == id, ct);
     }
 }

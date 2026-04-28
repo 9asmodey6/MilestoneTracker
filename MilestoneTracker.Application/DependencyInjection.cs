@@ -1,4 +1,4 @@
-﻿namespace MilestoneTracker.Application;
+namespace MilestoneTracker.Application;
 
 using System.Reflection;
 using AsyncKeyedLock;
@@ -6,6 +6,8 @@ using Common.Behaviors;
 using Common.Features.Milestones.AddMilestone;
 using Common.Features.Milestones.AddMilestone.Models;
 using Common.Features.Milestones.AddMilestone.Steps;
+using Common.Features.Milestones.GetMilestone;
+using Common.Features.Milestones.GetMilestone.Steps;
 using Common.Interfaces;
 using Common.Shared.Interfaces.Services;
 using Common.Shared.State;
@@ -30,17 +32,27 @@ public static class DependencyInjection
         services.AddSingleton<AsyncKeyedLocker<long>>();
         
         services.AddScoped<IMilestonePreviewService, MilestonePreviewService>();
+        services.AddScoped<IMilestoneViewService, MilestoneViewService>();
         // process milestone step handler
         services.AddScoped<IUserFlowHandler, ProcessMilestoneStepHandler>();
         // add milestone steps
-        services.AddScoped<IStepHandler<CreateMilestoneData>, StartedStepHandler>();
-        services.AddScoped<IStepHandler<CreateMilestoneData>, ChildStepHandler>();
-        services.AddScoped<IStepHandler<CreateMilestoneData>, CategoryStepHandler>();
-        services.AddScoped<IStepHandler<CreateMilestoneData>, DateStepHandler>();
-        services.AddScoped<IStepHandler<CreateMilestoneData>, TitleStepHandler>();
-        services.AddScoped<IStepHandler<CreateMilestoneData>, DescriptionStepHandler>();
-        services.AddScoped<IStepHandler<CreateMilestoneData>, MediaStepHandler>();
-        services.AddScoped<IStepHandler<CreateMilestoneData>, ConfirmingStepHandler>();
+        services.AddScoped<IStepHandler<CreateMilestoneData>, StartedStepCreateHandler>();
+        services.AddScoped<IStepHandler<CreateMilestoneData>, ChildStepCreateHandler>();
+        services.AddScoped<IStepHandler<CreateMilestoneData>, CategoryStepCreateHandler>();
+        services.AddScoped<IStepHandler<CreateMilestoneData>, DateStepCreateHandler>();
+        services.AddScoped<IStepHandler<CreateMilestoneData>, TitleStepCreateHandler>();
+        services.AddScoped<IStepHandler<CreateMilestoneData>, DescriptionStepCreateHandler>();
+        services.AddScoped<IStepHandler<CreateMilestoneData>, MediaStepCreateHandler>();
+        services.AddScoped<IStepHandler<CreateMilestoneData>, ConfirmingStepCreateHandler>();
+        // process get milestone step handler
+        services.AddScoped<IUserFlowHandler, ProcessGetMilestoneStepHandler>();
+        // get milestone steps
+        services.AddScoped<IStepHandler<GetMilestoneData>, ChildStepGetHandler>();
+        services.AddScoped<IStepHandler<GetMilestoneData>, ModeStepGetHandler>();
+        services.AddScoped<IStepHandler<GetMilestoneData>, CategoryStepGetHandler>();
+        services.AddScoped<IStepHandler<GetMilestoneData>, DateStepGetHandler>();
+        services.AddScoped<IStepHandler<GetMilestoneData>, ListStepGetHandler>();
+        services.AddScoped<IStepHandler<GetMilestoneData>, ViewItemStepGetHandler>();
         
         return services;
     }

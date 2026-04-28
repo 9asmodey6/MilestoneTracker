@@ -134,6 +134,11 @@ public class UpdateHandler(
                 state.State = UserStateType.AddMilestoneStarted;
                 await addMilestoneHandler.HandleAsync(context, state, ct);
                 break;
+            case  UiConstants.ReplyButtons.ViewMilestones:
+                var getMilestoneHandler = handlerFactory.GetHandler(UserStateType.GetMilestoneSelectingChild);
+                state.State = UserStateType.GetMilestoneSelectingChild;
+                await getMilestoneHandler.HandleAsync(context, state, ct);
+                break;
         }
     }
 
@@ -142,7 +147,7 @@ public class UpdateHandler(
         UiConstants.ReplyButtons.AddChild => true,
         UiConstants.ReplyButtons.AddMilestone => true,
         UiConstants.ReplyButtons.MyChildren => true,
-        UiConstants.ReplyButtons.History => true,
+        UiConstants.ReplyButtons.ViewMilestones => true,
         UiConstants.ReplyButtons.Help => true,
         _ => false
     };

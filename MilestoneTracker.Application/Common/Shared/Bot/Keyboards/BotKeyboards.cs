@@ -17,7 +17,7 @@ public static class BotKeyboards
         [new KeyboardButton(UiConstants.ReplyButtons.AddMilestone)],
         [
             new KeyboardButton(UiConstants.ReplyButtons.MyChildren),
-            new KeyboardButton(UiConstants.ReplyButtons.History)
+            new KeyboardButton(UiConstants.ReplyButtons.ViewMilestones)
         ],
         [new KeyboardButton(UiConstants.ReplyButtons.Help)]
     ]) { ResizeKeyboard = true };
@@ -194,7 +194,7 @@ public static class BotKeyboards
         {
             itemButtons.Add(InlineKeyboardButton.WithCallbackData(
                 text: (i + 1).ToString(),
-                callbackData: $"vm_item_{itemsOnPage[i].Id}"));
+                callbackData: $"{UiConstants.CallbackQueries.GetMilestones.ItemPrefix}{itemsOnPage[i].Id}"));
         }
         
         if (itemButtons.Any())
@@ -207,13 +207,13 @@ public static class BotKeyboards
         if (currentPage > 1)
         {
             navButtons.Add(InlineKeyboardButton.WithCallbackData(
-                "⬅️ Назад", $"vm_page_{currentPage - 1}"));
+                "⬅️ Назад", $"{UiConstants.CallbackQueries.GetMilestones.PagePrefix}{currentPage - 1}"));
         }
         
         if (currentPage < totalPages)
         {
             navButtons.Add(InlineKeyboardButton.WithCallbackData(
-                "Вперед ➡️", $"vm_page_{currentPage + 1}"));
+                "Вперед ➡️", $"{UiConstants.CallbackQueries.GetMilestones.PagePrefix}{currentPage + 1}"));
         }
 
         if (navButtons.Any())
@@ -229,5 +229,18 @@ public static class BotKeyboards
         });
 
         return new InlineKeyboardMarkup(buttons);
+    }
+
+    public static InlineKeyboardMarkup ViewMilestoneItemKeyboard(int milestoneId)
+    {
+        return new InlineKeyboardMarkup(new[]
+        {
+            new[]
+            {
+                InlineKeyboardButton.WithCallbackData(
+                    "🔙 Назад к списку",
+                    UiConstants.CallbackQueries.GetMilestones.BackToList)
+            }
+        });
     }
 }

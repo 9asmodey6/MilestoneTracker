@@ -11,10 +11,10 @@ using Shared.Interfaces.Services;
 using Shared.Models;
 using Shared.State;
 
-public class TitleStepHandler(
+public class TitleStepCreateHandler(
     ITelegramMessageService messageService,
     IMilestonePreviewService previewService,
-    ILogger<TitleStepHandler> logger) : IStepHandler<CreateMilestoneData>
+    ILogger<TitleStepCreateHandler> logger) : IStepHandler<CreateMilestoneData>
 {
     public UserStateType Step => UserStateType.AddMilestoneEnteringTitle;
 

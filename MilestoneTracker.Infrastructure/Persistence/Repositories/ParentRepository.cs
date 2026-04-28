@@ -44,7 +44,7 @@ public class ParentRepository(
             .ToListAsync(ct);
     }
 
-    public Task<Child?> GetChildrenByIdAsync(int childId, CancellationToken ct)
+    public Task<Child?> GetChildByIdAsync(int childId, CancellationToken ct)
     {
         return dbContext.Children.FirstOrDefaultAsync(c => c.Id == childId, ct);
     }

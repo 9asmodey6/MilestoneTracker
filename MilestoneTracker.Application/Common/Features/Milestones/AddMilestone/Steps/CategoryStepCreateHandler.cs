@@ -11,10 +11,10 @@ using Shared.Interfaces.Services;
 using Shared.Models;
 using Shared.State;
 
-public class CategoryStepHandler(
+public class CategoryStepCreateHandler(
     ITelegramMessageService messageService,
     IMilestonePreviewService previewService,
-    ILogger<CategoryStepHandler> logger) : IStepHandler<CreateMilestoneData>
+    ILogger<CategoryStepCreateHandler> logger) : IStepHandler<CreateMilestoneData>
 {
     public UserStateType Step => UserStateType.AddMilestoneSelectingCategory;
 

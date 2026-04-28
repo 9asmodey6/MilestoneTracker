@@ -10,12 +10,12 @@ using Shared.Interfaces.Services;
 using Shared.Models;
 using Shared.State;
 
-public class StartedStepHandler(
+public class StartedStepCreateHandler(
     ITelegramMessageService messageService,
     IUserStateService userStateService,
     IParentRepository parentRepository,
     IMilestonePreviewService previewService,
-    ILogger<StartedStepHandler> logger) : IStepHandler<CreateMilestoneData>
+    ILogger<StartedStepCreateHandler> logger) : IStepHandler<CreateMilestoneData>
 {
     public UserStateType Step => UserStateType.AddMilestoneStarted;
 

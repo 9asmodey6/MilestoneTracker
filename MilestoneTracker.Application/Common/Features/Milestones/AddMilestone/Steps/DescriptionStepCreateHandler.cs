@@ -10,10 +10,10 @@ using Shared.Interfaces.Services;
 using Shared.Models;
 using Shared.State;
 
-public class DescriptionStepHandler(
+public class DescriptionStepCreateHandler(
     ITelegramMessageService messageService,
     IMilestonePreviewService previewService,
-    ILogger<DescriptionStepHandler> logger) : IStepHandler<CreateMilestoneData>
+    ILogger<DescriptionStepCreateHandler> logger) : IStepHandler<CreateMilestoneData>
 {
     public UserStateType Step => UserStateType.AddMilestoneEnteringDescription;
 

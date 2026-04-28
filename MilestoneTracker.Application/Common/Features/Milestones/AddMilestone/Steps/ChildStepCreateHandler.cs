@@ -11,11 +11,11 @@ using Shared.Interfaces.Services;
 using Shared.Models;
 using Shared.State;
 
-public class ChildStepHandler(
+public class ChildStepCreateHandler(
     ITelegramMessageService messageService,
     IMilestonePreviewService previewService,
     IParentRepository parentRepository,
-    ILogger<ChildStepHandler> logger) : IStepHandler<CreateMilestoneData>
+    ILogger<ChildStepCreateHandler> logger) : IStepHandler<CreateMilestoneData>
 {
     public UserStateType Step => UserStateType.AddMilestoneSelectingChild;
 
@@ -31,7 +31,7 @@ public class ChildStepHandler(
             return new StepResult<CreateMilestoneData>(UserStateType.Idle, null);
         }
 
-        var child = await parentRepository.GetChildrenByIdAsync(selectedChildId, ct);
+        var child = await parentRepository.GetChildByIdAsync(selectedChildId, ct);
         if (child == null)
         {
             logger.LogWarning("Child with ID {Id} not found", selectedChildId);

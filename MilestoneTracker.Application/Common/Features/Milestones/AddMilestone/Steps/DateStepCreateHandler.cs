@@ -10,10 +10,10 @@ using Shared.Interfaces.Services;
 using Shared.Models;
 using Shared.State;
 
-public class DateStepHandler(
+public class DateStepCreateHandler(
     ITelegramMessageService messageService,
     IMilestonePreviewService previewService,
-    ILogger<DateStepHandler> logger) : IStepHandler<CreateMilestoneData>
+    ILogger<DateStepCreateHandler> logger) : IStepHandler<CreateMilestoneData>
 {
     public UserStateType Step => UserStateType.AddMilestoneEnteringDate;
 

@@ -14,12 +14,12 @@ using Shared.Models;
 using Shared.State;
 using Telegram.Bot.Types;
 
-public class ConfirmingStepHandler(
+public class ConfirmingStepCreateHandler(
     ITelegramMessageService messageService,
     IMediator mediator,
     IUserStateService userStateService,
     IParentRepository parentRepository,
-    ILogger<ConfirmingStepHandler> logger) : IStepHandler<CreateMilestoneData>
+    ILogger<ConfirmingStepCreateHandler> logger) : IStepHandler<CreateMilestoneData>
 {
     public UserStateType Step => UserStateType.AddMilestoneConfirming;
 

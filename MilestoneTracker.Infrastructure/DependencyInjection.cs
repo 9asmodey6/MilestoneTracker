@@ -1,4 +1,4 @@
-﻿namespace MilestoneTracker.Infrastructure;
+namespace MilestoneTracker.Infrastructure;
 
 using Application.Common.Features.Children.AddChild;
 using Application.Common.Interfaces;
@@ -47,7 +47,6 @@ public static class DependencyInjection
         services.AddScoped<IMilestoneRepository, MilestoneRepository>();
         
         services.AddScoped<IUserStateService, UserStateService>();
-        services.AddScoped<ITelegramMessageService, TelegramMessageService>();
         
         services.AddSingleton<ITelegramDateParser, TelegramDateParser>();
         

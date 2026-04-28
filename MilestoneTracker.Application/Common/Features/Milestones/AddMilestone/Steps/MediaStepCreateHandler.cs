@@ -14,12 +14,12 @@ using Shared.Models;
 using Shared.State;
 using Telegram.Bot.Types;
 
-public class MediaStepHandler(
+public class MediaStepCreateHandler(
     AsyncKeyedLocker<long> keyedLocker,
     ITelegramMessageService messageService,
     IUserStateService userStateService,
     IMilestonePreviewService previewService,
-    ILogger<MediaStepHandler> logger) : IStepHandler<CreateMilestoneData>
+    ILogger<MediaStepCreateHandler> logger) : IStepHandler<CreateMilestoneData>
 {
     public UserStateType Step => UserStateType.AddMilestoneUploadingMedia;
 
