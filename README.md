@@ -26,6 +26,13 @@ The project follows a hybrid architectural approach to combine the best of both 
 - **Logging**: Serilog
 - **Locking**: AsyncKeyedLock (for thread-safe chat processing)
 
+
+## Roadmap
+
+- [ ] Edit/Delete milestones
+- [ ] Multi-language support (English/Ukrainian)
+- [ ] Analytics for child growth 
+
 ## 🚧 Project Status: Work in Progress
 
 > [!NOTE]
