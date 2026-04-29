@@ -17,6 +17,15 @@ The project follows a hybrid architectural approach to combine the best of both 
 *   **MediatR**: Used to decouple request handling from the API/Infrastructure, promoting a "thin controller" approach.
 *   **Stateless Navigation**: Milestone retrieval uses DTO-based state management, minimizing unnecessary database roundtrips.
 
+
+## Key Features
+
+### 🔐 Secure Shared Access
+The system allows parents to share access to a child's profile with other family members using a secure, token-based mechanism:
+*   **Unique Tokens**: Generate a one-time secure HEX token (e.g., `a1b2c3d4e5f6`) valid for 24 hours.
+*   **Many-to-Many Linking**: A child can be linked to multiple parent accounts, allowing everyone to view and contribute to the same timeline.
+*   **Validation**: The system ensures tokens are used only once, haven't expired, and don't grant duplicate access.
+
 ## Tech Stack
 
 - **Backend**: .NET 8
