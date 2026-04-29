@@ -20,7 +20,7 @@ The project follows a hybrid architectural approach to combine the best of both 
 
 ## Key Features
 
-### 🔐 Secure Shared Access
+### Secure Shared Access
 The system allows parents to share access to a child's profile with other family members using a secure, token-based mechanism:
 *   **Unique Tokens**: Generate a one-time secure HEX token (e.g., `a1b2c3d4e5f6`) valid for 24 hours.
 *   **Many-to-Many Linking**: A child can be linked to multiple parent accounts, allowing everyone to view and contribute to the same timeline.
