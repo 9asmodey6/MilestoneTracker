@@ -7,6 +7,7 @@ using Common.Features.Milestones.AddMilestone;
 using Common.Features.Milestones.AddMilestone.Models;
 using Common.Features.Milestones.AddMilestone.Steps;
 using Common.Features.Milestones.GetMilestone;
+using Common.Features.Milestones.GetMilestone.Models;
 using Common.Features.Milestones.GetMilestone.Steps;
 using Common.Interfaces;
 using Common.Shared.Interfaces.Services;

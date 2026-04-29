@@ -6,6 +6,7 @@ using Domain.Enums;
 using Infrastructure.Models;
 using Interfaces;
 using Microsoft.Extensions.Logging;
+using Models;
 using Shared.Bot.Keyboards;
 using Shared.Interfaces.Repositories;
 using Shared.Models;

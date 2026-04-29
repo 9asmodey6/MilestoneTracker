@@ -1,4 +1,4 @@
-namespace MilestoneTracker.Application.Common.Features.Milestones.GetMilestone;
+namespace MilestoneTracker.Application.Common.Features.Milestones.GetMilestone.Models;
 
 using Domain.Enums;
 
