@@ -1,4 +1,4 @@
-﻿namespace MilestoneTracker.Infrastructure.Persistence;
+namespace MilestoneTracker.Infrastructure.Persistence;
 
 using Application.Common.Interfaces;
 using Domain.Entities;
@@ -16,6 +16,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Child> Children { get; set; }
 
     public DbSet<UserState> UserStates { get; set; }
+    public DbSet<ChildAccessToken> AccessTokens { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -1,4 +1,4 @@
-﻿namespace MilestoneTracker.Application.Common.Features.Children.AddChild;
+namespace MilestoneTracker.Application.Common.Features.Children.AddChild;
 
 using Domain.Entities;
 using Interfaces;
@@ -22,7 +22,6 @@ public class CreateChildHandler(
         {
             var child = new Child
             {
-                ParentId = command.ParentId,
                 Name = command.Name,
                 BirthDate = command.Date.ToUniversalTime(),
                 PhotoFileId = command.PhotoId,

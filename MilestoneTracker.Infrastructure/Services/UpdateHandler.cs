@@ -139,6 +139,14 @@ public class UpdateHandler(
                 state.State = UserStateType.GetMilestoneSelectingChild;
                 await getMilestoneHandler.HandleAsync(context, state, ct);
                 break;
+            case UiConstants.ReplyButtons.ProvideAccessByToken:
+                var provideAccessHandler = handlerFactory.GetHandler(UserStateType.ProvideAccessSelectingChild);
+                await provideAccessHandler.HandleAsync(context, state, ct);
+                break;
+            case UiConstants.ReplyButtons.GainAccessByToken:
+                var gainAccessHandler = handlerFactory.GetHandler(UserStateType.GainAccessEnteringToken);
+                await gainAccessHandler.HandleAsync(context, state, ct);
+                break;
         }
     }
 

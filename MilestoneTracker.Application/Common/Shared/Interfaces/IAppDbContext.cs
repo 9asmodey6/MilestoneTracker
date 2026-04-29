@@ -1,4 +1,4 @@
-﻿namespace MilestoneTracker.Application.Common.Interfaces;
+namespace MilestoneTracker.Application.Common.Interfaces;
 
 using Domain.Entities;
 using Domain.Entities.Milestones;
@@ -11,6 +11,6 @@ public interface IAppDbContext
     DbSet<Parent> Parents { get; }
     DbSet<Child> Children { get; }
     DbSet<UserState> UserStates { get; } 
-
+    DbSet<ChildAccessToken> AccessTokens { get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

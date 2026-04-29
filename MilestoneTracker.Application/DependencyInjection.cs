@@ -3,6 +3,10 @@ namespace MilestoneTracker.Application;
 using System.Reflection;
 using AsyncKeyedLock;
 using Common.Behaviors;
+using Common.Features.Children.GainAccess;
+using Common.Features.Children.GainAccess.Steps;
+using Common.Features.Children.ProvideAccess;
+using Common.Features.Children.ProvideAccess.Steps;
 using Common.Features.Milestones.AddMilestone;
 using Common.Features.Milestones.AddMilestone.Models;
 using Common.Features.Milestones.AddMilestone.Steps;
@@ -54,6 +58,16 @@ public static class DependencyInjection
         services.AddScoped<IStepHandler<GetMilestoneData>, DateStepGetHandler>();
         services.AddScoped<IStepHandler<GetMilestoneData>, ListStepGetHandler>();
         services.AddScoped<IStepHandler<GetMilestoneData>, ViewItemStepGetHandler>();
+
+        // Provide access
+        services.AddScoped<IUserFlowHandler, ProcessProvideStepAccessStepHandler>();
+        services.AddScoped<IStepHandler<ProvideAccessData>, ChildProvideStepHandler>();
+        services.AddScoped<IStepHandler<ProvideAccessData>, ConfirmProvideStepHandler>();
+
+        // Gain access
+        services.AddScoped<IUserFlowHandler, ProcessGainByTokenStepHandler>();
+        services.AddScoped<IStepHandler<GainAccessByTokenCommand>, EnteringGainStepHandler>();
+        services.AddScoped<IStepHandler<GainAccessByTokenCommand>, ConfirmingGainStepHandler>();
         
         return services;
     }

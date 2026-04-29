@@ -27,4 +27,10 @@ public enum UserStateType
     GetMilestoneSelectingDate = 33,
     GetMilestoneList = 34,
     GetMilestoneViewItem = 35,
+    
+    ProvideAccessSelectingChild = 40,
+    ProvideAccessConfirming = 41,
+    
+    GainAccessEnteringToken = 50,
+    GainAccessConfirming = 51,
 }

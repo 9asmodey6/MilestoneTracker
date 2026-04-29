@@ -4,6 +4,7 @@ using Application.Common.Features.Children.AddChild;
 using Application.Common.Interfaces;
 using Application.Common.Shared.Interfaces;
 using Application.Common.Shared.Interfaces.Repositories;
+using Application.Common.Shared.Interfaces.Services;
 using Application.Common.Shared.State;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -47,6 +48,7 @@ public static class DependencyInjection
         services.AddScoped<IMilestoneRepository, MilestoneRepository>();
         
         services.AddScoped<IUserStateService, UserStateService>();
+        services.AddScoped<IChildAccessTokenService, ChildAccessTokenService>();
         
         services.AddSingleton<ITelegramDateParser, TelegramDateParser>();
         

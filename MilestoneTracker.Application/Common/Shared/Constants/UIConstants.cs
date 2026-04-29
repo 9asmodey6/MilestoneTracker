@@ -5,10 +5,15 @@ public static class UiConstants
     public static class ReplyButtons
     {
         public const string AddChild = "➕ Добавить ребёнка";
-        public const string AddMilestone = "➕ Добавить воспоминание";
         public const string MyChildren = "👶 Мои дети";
+        
+        public const string AddMilestone = "➕ Добавить воспоминание";
         public const string ViewMilestones = "📜 Посмотреть восспоминания";
+        
         public const string Help = "📋 Помощь";
+        
+        public const string ProvideAccessByToken = "🍼 Предоставить доступ к восспоминаниям второму родителю";
+        public const string GainAccessByToken = "👶 Добавить сущевствующего ребнка с помощью специального кода";
     }
 
     public static class SlashCommandsву

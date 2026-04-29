@@ -4,20 +4,23 @@ using Domain.Entities;
 using Domain.Enums;
 using Constants;
 using Domain.Entities.Milestones;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Telegram.Bot.Types.ReplyMarkups;
 
 public static class BotKeyboards
 {
     public static ReplyKeyboardMarkup WelcomeKeyboard => new([
         [new KeyboardButton(UiConstants.ReplyButtons.AddChild)],
-        [new KeyboardButton(UiConstants.ReplyButtons.Help)]
+        [new KeyboardButton(UiConstants.ReplyButtons.Help)],
+        [new KeyboardButton(UiConstants.ReplyButtons.GainAccessByToken)]
     ]) { ResizeKeyboard = true };
 
     public static ReplyKeyboardMarkup MainMenuKeyboard => new([
         [new KeyboardButton(UiConstants.ReplyButtons.AddMilestone)],
         [
             new KeyboardButton(UiConstants.ReplyButtons.MyChildren),
-            new KeyboardButton(UiConstants.ReplyButtons.ViewMilestones)
+            new KeyboardButton(UiConstants.ReplyButtons.ViewMilestones),
+            new KeyboardButton(UiConstants.ReplyButtons.ProvideAccessByToken),
         ],
         [new KeyboardButton(UiConstants.ReplyButtons.Help)]
     ]) { ResizeKeyboard = true };
@@ -240,6 +243,25 @@ public static class BotKeyboards
                 InlineKeyboardButton.WithCallbackData(
                     "🔙 Назад к списку",
                     UiConstants.CallbackQueries.GetMilestones.BackToList)
+            }
+        });
+    }
+    
+    public static InlineKeyboardMarkup ConfirmChildForProvidingKeyboard(Child child)
+    {
+        return new InlineKeyboardMarkup(new[]
+        {
+            new[]
+            {
+                InlineKeyboardButton.WithCallbackData(
+                    $"👶 Поделиться доступом к {child.Name}", 
+                    child.Id.ToString()),
+            },
+            new[]
+            {
+                InlineKeyboardButton.WithCallbackData(
+                    "❌ Отменить", 
+                    "/cancel")
             }
         });
     }

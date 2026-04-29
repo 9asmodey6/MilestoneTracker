@@ -1,4 +1,4 @@
-﻿namespace MilestoneTracker.Infrastructure.Persistence.Repositories;
+namespace MilestoneTracker.Infrastructure.Persistence.Repositories;
 
 using Application.Common.Interfaces;
 using Domain.Entities;
@@ -25,6 +25,7 @@ public class ParentRepository(
     public async Task<int> AddChildAsync(int parentId, Child child, CancellationToken ct)
     {
         var parent = await dbContext.Parents
+            .Include(p => p.Children)
             .FirstOrDefaultAsync(p => p.Id == parentId, ct);
 
         if (parent == null)
@@ -40,7 +41,7 @@ public class ParentRepository(
     public async Task<List<Child>> GetChildrenAsync(long chatId, CancellationToken ct)
     {
         return await dbContext.Children
-            .Where(c => c.Parent.ChatId == chatId)
+            .Where(c => c.Parents.Any(p => p.ChatId == chatId))
             .ToListAsync(ct);
     }
 

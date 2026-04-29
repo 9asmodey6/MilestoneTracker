@@ -1,4 +1,4 @@
-﻿namespace MilestoneTracker.Infrastructure.Persistence.Configurations.Parent;
+namespace MilestoneTracker.Infrastructure.Persistence.Configurations.Parent;
 
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -21,8 +21,6 @@ public class ParentConfiguration : IEntityTypeConfiguration<Parent>
             .IsUnique();
 
         builder.HasMany(p => p.Children)
-            .WithOne(c => c.Parent)
-            .HasForeignKey(c => c.ParentId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .WithMany(c => c.Parents);
     }
 }

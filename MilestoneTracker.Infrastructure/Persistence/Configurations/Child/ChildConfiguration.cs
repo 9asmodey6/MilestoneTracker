@@ -1,4 +1,4 @@
-﻿namespace MilestoneTracker.Infrastructure.Persistence.Configurations.Child;
+namespace MilestoneTracker.Infrastructure.Persistence.Configurations.Child;
 
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -20,9 +20,8 @@ public class ChildConfiguration : IEntityTypeConfiguration<Child>
         builder.HasMany(c => c.Milestones)
             .WithOne(m => m.Child)
             .HasForeignKey(m => m.ChildId);
-        
-        builder.HasOne(c => c.Parent)
-            .WithMany(p => p.Children)
-            .HasForeignKey(c => c.ParentId);
+
+        builder.HasMany(c => c.Parents)
+            .WithMany(p => p.Children);
     }
 }
