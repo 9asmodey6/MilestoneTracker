@@ -8,17 +8,18 @@ using Constants;
 using Domain.Enums;
 using Infrastructure.Models;
 using Interfaces;
+using MediatR;
 using Microsoft.Extensions.Logging;
+using Models;
 using Shared.Bot.Keyboards;
 using Shared.Interfaces.Repositories;
-using Shared.Interfaces.Services;
 using Shared.Models;
 using Shared.State;
 
 public class ListStepGetHandler(
     ITelegramMessageService messageService,
     IMilestoneRepository milestoneRepository,
-    IMilestoneViewService milestoneViewService,
+    IMediator mediator,
     ILogger<ListStepGetHandler> logger) : IStepHandler<GetMilestoneData>
 {
     public UserStateType Step => UserStateType.GetMilestoneList;
@@ -82,14 +83,15 @@ public class ListStepGetHandler(
         {
             if (int.TryParse(callbackData.Replace(UiConstants.CallbackQueries.GetMilestones.ItemPrefix, ""), out int itemId))
             {
-                var milestone = await milestoneRepository.GetByIdAsync(itemId, ct);
-                if (milestone != null)
-                {
-                    await milestoneViewService.SendMilestoneCardAsync(context.ChatId, milestone, data.ChildName, ct);
+                var query = new GetMilestoneByIdQuery(
+                    ChatId: context.ChatId,
+                    MilestoneId: itemId,
+                    ChildName: data.ChildName);
+
+                await mediator.Send(query, ct);
                     
-                    var updatedData = data with { SelectedMilestoneId = itemId };
-                    return new StepResult<GetMilestoneData>(UserStateType.GetMilestoneViewItem, updatedData);
-                }
+                var updatedData = data with { SelectedMilestoneId = itemId };
+                return new StepResult<GetMilestoneData>(UserStateType.GetMilestoneViewItem, updatedData);
             }
         }
 
