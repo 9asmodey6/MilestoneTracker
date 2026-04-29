@@ -2,7 +2,7 @@
 
 A modern Telegram bot designed to help parents track and preserve their children's important milestones. Built with a focus on clean code, performance, and maintainability.
 
-## 🏗 Architecture & Design Patterns
+## Architecture & Design Patterns
 
 The project follows a hybrid architectural approach to combine the best of both worlds:
 
@@ -11,13 +11,13 @@ The project follows a hybrid architectural approach to combine the best of both 
 *   **State Machine Flow**: A robust state-based engine handles complex multi-step interactions (e.g., a wizard-like flow for adding a milestone with photos, dates, and descriptions).
 *   **Handler Factory**: A dynamic factory pattern is used to resolve the correct state handler for every incoming update, ensuring the main logic remains clean and scalable.
 
-## 🚀 Performance Features
+## Performance Features
 
 *   **Instant Response (Non-blocking)**: The bot utilizes an **internal update queue** and a **Background Worker**. This allows the Webhook to respond to Telegram servers in approximately **1.5 ms**, while the actual processing happens asynchronously.
 *   **MediatR**: Used to decouple request handling from the API/Infrastructure, promoting a "thin controller" approach.
 *   **Stateless Navigation**: Milestone retrieval uses DTO-based state management, minimizing unnecessary database roundtrips.
 
-## 🛠 Tech Stack
+## Tech Stack
 
 - **Backend**: .NET 8
 - **Database**: PostgreSQL with Entity Framework Core
@@ -26,7 +26,14 @@ The project follows a hybrid architectural approach to combine the best of both 
 - **Logging**: Serilog
 - **Locking**: AsyncKeyedLock (for thread-safe chat processing)
 
-## 🚧 Project Status: Work in Progress
+
+## Roadmap
+
+- [ ] Edit/Delete milestones
+- [ ] Multi-language support (English/Ukrainian)
+- [ ] Analytics for child growth 
+
+## Project Status: Work in Progress
 
 > [!NOTE]
 > This project is currently under active development. Some flows are incomplete or simplified.
