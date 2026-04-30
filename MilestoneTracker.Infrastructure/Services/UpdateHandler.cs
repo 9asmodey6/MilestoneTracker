@@ -159,7 +159,7 @@ public class UpdateHandler(
         else
         {
             logger.LogWarning("No handler found for state {State} for chat {ChatId}", state.State, context.ChatId);
-            await userStateService.ResetAsync(context.ChatId, ct);
+            await stateService.ResetAsync(context.ChatId, ct);
             await botClient.SendMessage(context.ChatId, 
                 "😕 Что-то пошло не так с текущим действием. Я сбросил состояние, пожалуйста, попробуйте еще раз.", 
                 cancellationToken: ct);
