@@ -122,8 +122,7 @@ public static class DependencyInjection
 
     public static IServiceCollection AddAppHealthChecks(this IServiceCollection services)
     {
-        services.AddHealthChecks()
-            .AddDbContextCheck<AppDbContext>();
+        services.AddHealthChecks();
 
         return services;
     }
