@@ -91,12 +91,35 @@ public class UpdateHandler(
 
         if (string.IsNullOrEmpty(data))
         {
-            logger.LogWarning("Unhandled callback query from {ChatId}: {Data}", context.ChatId, data);
+            logger.LogWarning("Empty callback query from {ChatId}", context.ChatId);
+            return;
+        }
+
+        // Handle legacy/inline specific data
+        if (data == UiConstants.CallbackQueries.AddChild)
+        {
+            data = UiConstants.ReplyButtons.AddChild;
+        }
+
+        // If callback data matches a menu button, redirect to HandleMenuButtonAsync
+        if (IsMenuButton(data))
+        {
+            await HandleMenuButtonAsync(context with { Text = data }, state, ct);
             return;
         }
 
         var handler = handlerFactory.GetHandler(state.State);
-        await handler.HandleAsync(context, state, ct);
+        if (handler != null)
+        {
+            await handler.HandleAsync(context, state, ct);
+        }
+        else
+        {
+            logger.LogWarning("No handler found for state {State} and callback data {Data}", state.State, data);
+            await botClient.SendMessage(context.ChatId, 
+                "😕 Не удалось обработать ваш выбор. Пожалуйста, используйте кнопки меню или введите /help.", 
+                cancellationToken: ct);
+        }
     }
 
     private async Task HandleCommandAsync(BotContext context, CancellationToken ct)
@@ -129,7 +152,18 @@ public class UpdateHandler(
     private async Task HandleStatefulInteractionAsync(BotContext context, UserState state, CancellationToken ct)
     {
         var handler = handlerFactory.GetHandler(state.State);
-        await handler.HandleAsync(context, state, ct);
+        if (handler != null)
+        {
+            await handler.HandleAsync(context, state, ct);
+        }
+        else
+        {
+            logger.LogWarning("No handler found for state {State} for chat {ChatId}", state.State, context.ChatId);
+            await userStateService.ResetAsync(context.ChatId, ct);
+            await botClient.SendMessage(context.ChatId, 
+                "😕 Что-то пошло не так с текущим действием. Я сбросил состояние, пожалуйста, попробуйте еще раз.", 
+                cancellationToken: ct);
+        }
     }
 
     private async Task HandleMenuButtonAsync(
@@ -141,8 +175,11 @@ public class UpdateHandler(
         {
             case UiConstants.ReplyButtons.AddChild:
                 var addChildHandler = handlerFactory.GetHandler(UserStateType.AddChildStarted);
-                state.State = UserStateType.AddChildStarted;
-                await addChildHandler.HandleAsync(context, state, ct);
+                if (addChildHandler != null)
+                {
+                    state.State = UserStateType.AddChildStarted;
+                    await addChildHandler.HandleAsync(context, state, ct);
+                }
                 break;
             case UiConstants.ReplyButtons.MyChildren:
                await mediator.Send(new GetChildrenQuery(
@@ -150,23 +187,35 @@ public class UpdateHandler(
                 break;
             case UiConstants.ReplyButtons.AddMilestone:
                 var addMilestoneHandler = handlerFactory.GetHandler(UserStateType.AddMilestoneStarted);
-                state.State = UserStateType.AddMilestoneStarted;
-                await addMilestoneHandler.HandleAsync(context, state, ct);
+                if (addMilestoneHandler != null)
+                {
+                    state.State = UserStateType.AddMilestoneStarted;
+                    await addMilestoneHandler.HandleAsync(context, state, ct);
+                }
                 break;
             case  UiConstants.ReplyButtons.ViewMilestones:
                 var getMilestoneHandler = handlerFactory.GetHandler(UserStateType.GetMilestoneSelectingChild);
-                state.State = UserStateType.GetMilestoneSelectingChild;
-                await getMilestoneHandler.HandleAsync(context, state, ct);
+                if (getMilestoneHandler != null)
+                {
+                    state.State = UserStateType.GetMilestoneSelectingChild;
+                    await getMilestoneHandler.HandleAsync(context, state, ct);
+                }
                 break;
             case UiConstants.ReplyButtons.ProvideAccessByToken:
                 state.State = UserStateType.ProvideAccessSelectingChild;
                 var provideAccessHandler = handlerFactory.GetHandler(state.State);
-                await provideAccessHandler.HandleAsync(context, state, ct);
+                if (provideAccessHandler != null)
+                {
+                    await provideAccessHandler.HandleAsync(context, state, ct);
+                }
                 break;
             case UiConstants.ReplyButtons.GainAccessByToken:
                 state.State = UserStateType.GainAccessEnteringToken;
                 var gainAccessHandler = handlerFactory.GetHandler(state.State);
-                await gainAccessHandler.HandleAsync(context, state, ct);
+                if (gainAccessHandler != null)
+                {
+                    await gainAccessHandler.HandleAsync(context, state, ct);
+                }
                 break;
             case UiConstants.ReplyButtons.Help:
                 await mediator.Send(new HelpCommand(context.ChatId), ct);

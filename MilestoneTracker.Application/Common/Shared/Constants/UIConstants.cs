@@ -25,6 +25,7 @@ public static class UiConstants
 
     public static class CallbackQueries
     {
+        public const string AddChild = "add_child";
         public const string Skip = "skip";
         public const string FinishMediaUpload = "finish_media_upload";
         

@@ -39,7 +39,7 @@ public static class BotKeyboards
     public static InlineKeyboardMarkup AddChildKeyboard => new InlineKeyboardMarkup(
         new[]
         {
-            new[] { InlineKeyboardButton.WithCallbackData("➕ Добавить ребёнка", "add_child") }
+            new[] { InlineKeyboardButton.WithCallbackData("➕ Добавить ребёнка", UiConstants.CallbackQueries.AddChild) }
         });
 
     public static InlineKeyboardMarkup CategorySelectionKeyboard()
