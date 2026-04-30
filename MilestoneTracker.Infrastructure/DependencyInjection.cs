@@ -119,4 +119,12 @@ public static class DependencyInjection
                     theme: AnsiConsoleTheme.Grayscale);
         });
     }
+
+    public static IServiceCollection AddAppHealthChecks(this IServiceCollection services)
+    {
+        services.AddHealthChecks()
+            .AddDbContextCheck<AppDbContext>();
+
+        return services;
+    }
 }

@@ -20,7 +20,10 @@ public static class BotKeyboards
         [
             new KeyboardButton(UiConstants.ReplyButtons.MyChildren),
             new KeyboardButton(UiConstants.ReplyButtons.ViewMilestones),
+        ],
+        [
             new KeyboardButton(UiConstants.ReplyButtons.ProvideAccessByToken),
+            new KeyboardButton(UiConstants.ReplyButtons.GainAccessByToken),
         ],
         [new KeyboardButton(UiConstants.ReplyButtons.Help)]
     ]) { ResizeKeyboard = true };
@@ -98,7 +101,7 @@ public static class BotKeyboards
             new[]
             {
                 InlineKeyboardButton.WithCallbackData(
-                    "❌ Отменить создание восспоминания",
+                    "❌ Отменить создание воспоминания",
                     "/cancel")
             }
         });

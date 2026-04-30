@@ -8,12 +8,12 @@ public static class UiConstants
         public const string MyChildren = "👶 Мои дети";
         
         public const string AddMilestone = "➕ Добавить воспоминание";
-        public const string ViewMilestones = "📜 Посмотреть восспоминания";
+        public const string ViewMilestones = "📜 Воспоминания";
         
         public const string Help = "📋 Помощь";
         
-        public const string ProvideAccessByToken = "🍼 Предоставить доступ к восспоминаниям второму родителю";
-        public const string GainAccessByToken = "👶 Добавить сущевствующего ребнка с помощью специального кода";
+        public const string ProvideAccessByToken = "🍼 Поделиться доступом";
+        public const string GainAccessByToken = "🔑 Добавить по коду";
     }
 
     public static class SlashCommandsву

@@ -2,6 +2,8 @@ using MilestoneTracker.Application;
 using MilestoneTracker.Infrastructure;
 using Serilog;
 using MilestoneTracker.API.Extensions;
+using MilestoneTracker.Infrastructure.Options;
+using Telegram.Bot;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,7 +15,8 @@ builder.Services.ApplyConfigurations(builder.Configuration)
     .AddTelegramBot(builder.Configuration)
     .AddInfractructure(builder.Configuration)
     .AddApplication()
-    .AddSerilogLogging();
+    .AddSerilogLogging()
+    .AddAppHealthChecks();
 
 
 var app = builder.Build();
@@ -31,6 +34,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.MapHealthChecks("/health");
 
 app.MapControllers();
 app.Run();
