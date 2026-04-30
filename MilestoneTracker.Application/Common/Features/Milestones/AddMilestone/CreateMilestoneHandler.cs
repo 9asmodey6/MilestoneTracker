@@ -7,6 +7,7 @@ using Domain.Enums;
 using Exceptions;
 using Interfaces;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Models;
 using Shared.Bot.Keyboards;
@@ -37,6 +38,7 @@ public class CreateMilestoneHandler(
                 ChildId = command.ChildId,
                 Description = command.Description,
                 CreatorId = command.CreatorId,
+                Category = command.Category,
                 OccurredAt = DateTime.SpecifyKind(command.OccuredAt.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc),
                 CreatedAt = DateTime.UtcNow,
                 MediaFiles = command.MediaFiles ?? new List<MilestoneMedia>(),
@@ -91,6 +93,25 @@ public class CreateMilestoneHandler(
                 ct: cancellationToken);
 
             await userStateService.ResetAsync(command.ChatId, cancellationToken);
+        }
+        catch (DbUpdateException ex)
+        {
+            logger.LogError(ex, "Database error creating milestone");
+            await messageService.SendTextMessageAsync(
+                command.ChatId,
+                "❌ Ошибка сохранения. Попробуйте позже.",
+                ct: cancellationToken);
+            await userStateService.ResetAsync(command.ChatId, cancellationToken);
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Unexpected error creating milestone");
+            await messageService.SendTextMessageAsync(
+                command.ChatId,
+                "❌ Произошла ошибка. /cancel для отмены.",
+                ct: cancellationToken);
+            throw;
         }
 
         return milestoneId;
