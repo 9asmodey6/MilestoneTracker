@@ -12,6 +12,10 @@ public class Milestone
     
     public string Title { get; set; } = null!;
     public string? Description { get; set; }
+    public bool IsDeleted { get; set; } = false;
+    public int? DeletedBy { get; set; }
+    public DateTime? DeletedAt { get; set; }
+    
     
     public DateTime OccurredAt { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

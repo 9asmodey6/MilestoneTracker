@@ -1,6 +1,8 @@
 namespace MilestoneTracker.Application.Common.Features.Milestones.GetMilestone.Steps;
 
 using Constants;
+using DeleteMilestone;
+using DeleteMilestone.Models;
 using Domain.Enums;
 using Infrastructure.Models;
 using Interfaces;
@@ -8,13 +10,14 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using Models;
 using Shared.Bot.Keyboards;
-using Shared.Interfaces.Repositories;
+using Shared.Interfaces.Services;
 using Shared.Models;
 using Shared.State;
 
 public class ViewItemStepGetHandler(
-    IMilestoneRepository milestoneRepository,
+    IMilestoneViewService viewService,
     ITelegramMessageService messageService,
+    IUserStateService userStateService,
     IMediator mediator,
     ILogger<ViewItemStepGetHandler> logger) : IStepHandler<GetMilestoneData>
 {
@@ -25,8 +28,7 @@ public class ViewItemStepGetHandler(
     {
         logger.LogInformation("Processing view item step for chat {ChatId}, milestoneId={MilestoneId}.",
             context.ChatId, data.SelectedMilestoneId);
-
-        // Если пришло текстовое сообщение — подсказка
+        
         if (!context.IsCallback)
         {
             await messageService.SendTextMessageAsync(
@@ -38,28 +40,14 @@ public class ViewItemStepGetHandler(
 
         var callbackData = context.CallbackData;
 
-        // Назад к списку
+        // Back to list
         if (callbackData == UiConstants.CallbackQueries.GetMilestones.BackToList)
         {
-            var (items, totalCount) = await milestoneRepository.GetPaginatedAsync(
-                childId: data.ChildId!.Value,
-                pageNumber: data.CurrentPage,
-                category: data.Mode == ViewMode.Category ? data.SelectedCategory : null,
-                specificDate: data.Mode == ViewMode.Date ? data.SelectedDate : null,
-                ct: ct);
-
-            var totalPages = MilestoneListMessageBuilder.CalculateTotalPages(totalCount);
-
-            await messageService.SendMessageWithInlineKeyboardAsync(
-                context.ChatId,
-                MilestoneListMessageBuilder.BuildListMessage(data, items, data.CurrentPage, totalPages),
-                BotKeyboards.PaginationKeyboard(data.CurrentPage, totalPages, items),
-                ct);
+            await viewService.SendMilestoneListAsync(context.ChatId, data, ct);
 
             return new StepResult<GetMilestoneData>(UserStateType.GetMilestoneList, data with { SelectedMilestoneId = null });
         }
-
-        // Если нажата кнопка конкретного воспоминания (например, из той же клавиатуры)
+        
         if (callbackData != null && callbackData.StartsWith(UiConstants.CallbackQueries.GetMilestones.ItemPrefix))
         {
             if (int.TryParse(callbackData.Replace(UiConstants.CallbackQueries.GetMilestones.ItemPrefix, ""), out int itemId))
@@ -70,12 +58,34 @@ public class ViewItemStepGetHandler(
                     ChildName: data.ChildName);
 
                 await mediator.Send(query, ct);
-
+                
                 return new StepResult<GetMilestoneData>(UserStateType.GetMilestoneViewItem, data with { SelectedMilestoneId = itemId });
             }
         }
 
-        // Неизвестный callback — остаёмся в текущем состоянии
+        // Delete milestone command
+        if (callbackData != null && callbackData.StartsWith(UiConstants.CallbackQueries.DeleteMilestone.DeleteMilestoneCommand))
+        {
+            if (int.TryParse(callbackData.Replace(UiConstants.CallbackQueries.DeleteMilestone.DeleteMilestoneCommand, ""), out int itemId))
+            {
+                await messageService.SendMessageWithInlineKeyboardAsync(
+                    context.ChatId,
+                    "Вы <b>уверены</b> что хотите удалить это воспоминание?\n\nПосле удаления его можно будет восстановить в главном меню.",
+                    BotKeyboards.MilestoneDeleteConfirmationKeyboard(itemId),
+                    ct);
+
+                await userStateService.UpdateAsync(
+                    context.ChatId,
+                    UserStateType.DeleteMilestoneConfirming,
+                    new DeleteMilestoneData(
+                        data.SelectedMilestoneId!.Value,
+                        data), ct);
+                
+                return new StepResult<GetMilestoneData>(UserStateType.Idle, null);
+            }
+        }
+        
+        // Unknown callback
         logger.LogWarning("Unknown callback '{CallbackData}' in ViewItem state for chat {ChatId}",
             callbackData, context.ChatId);
 

@@ -15,4 +15,5 @@ public interface IMilestoneRepository
         CancellationToken ct = default);
 
     Task<Milestone?> GetByIdAsync(int id, CancellationToken ct = default);
+    Task UpdateAsync(Milestone milestone, CancellationToken ct = default);
 }

@@ -4,11 +4,15 @@ using System.Text;
 using Application.Common.Interfaces;
 using Domain.Entities.Milestones;
 using Domain.Enums;
+using Models;
 using Shared.Bot.Keyboards;
+using Shared.Interfaces.Repositories;
 using Shared.Interfaces.Services;
 using Shared.Models;
 
-public class MilestoneViewService(ITelegramMessageService messageService) : IMilestoneViewService
+public class MilestoneViewService(
+    ITelegramMessageService messageService,
+    IMilestoneRepository milestoneRepository) : IMilestoneViewService
 {
     public async Task SendMilestoneCardAsync(long chatId, Milestone milestone, string? childName,
         CancellationToken ct)
@@ -35,8 +39,7 @@ public class MilestoneViewService(ITelegramMessageService messageService) : IMil
                 chatId, "⬆️ Воспоминание выше. Выберите действие:", keyboard, ct);
             return;
         }
-
-        // Медиагруппа (2+ файлов): подпись идёт на первый элемент
+        
         var mediaItems = milestone.MediaFiles
             .Select((m, i) => new MediaItem(m.FileId, m.Type, i == 0 ? summary : null))
             .ToList();
@@ -44,6 +47,24 @@ public class MilestoneViewService(ITelegramMessageService messageService) : IMil
         await messageService.SendMediaGroupAsync(chatId, mediaItems, ct);
         await messageService.SendMessageWithInlineKeyboardAsync(
             chatId, "⬆️ Воспоминание выше. Выберите действие:", keyboard, ct);
+    }
+
+    public async Task SendMilestoneListAsync(long chatId, GetMilestoneData data, CancellationToken ct)
+    {
+        var (items, totalCount) = await milestoneRepository.GetPaginatedAsync(
+            childId: data.ChildId!.Value,
+            pageNumber: data.CurrentPage,
+            category: data.Mode == ViewMode.Category ? data.SelectedCategory : null,
+            specificDate: data.Mode == ViewMode.Date ? data.SelectedDate : null,
+            ct: ct);
+
+        var totalPages = MilestoneListMessageBuilder.CalculateTotalPages(totalCount);
+
+        await messageService.SendMessageWithInlineKeyboardAsync(
+            chatId,
+            MilestoneListMessageBuilder.BuildListMessage(data, items, data.CurrentPage, totalPages),
+            BotKeyboards.PaginationKeyboard(data.CurrentPage, totalPages, items),
+            ct);
     }
 
     private static string BuildSummary(Milestone milestone, string? childName)

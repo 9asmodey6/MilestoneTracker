@@ -24,7 +24,8 @@ public class MilestoneRepository(
         DateTime? specificDate = null,
         CancellationToken ct = default)
     {
-        var query = dbContext.Milestones.Where(m => m.ChildId == childId);
+        var query = dbContext.Milestones
+            .Where(m => m.ChildId == childId && !m.IsDeleted);
         
         if (category.HasValue)
         {
@@ -53,5 +54,11 @@ public class MilestoneRepository(
         return await dbContext.Milestones
             .Include(m => m.MediaFiles)
             .FirstOrDefaultAsync(m => m.Id == id, ct);
+    }
+
+    public async Task UpdateAsync(Milestone milestone, CancellationToken ct = default)
+    {
+        dbContext.Milestones.Update(milestone);
+        await dbContext.SaveChangesAsync(ct);
     }
 }

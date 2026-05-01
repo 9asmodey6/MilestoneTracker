@@ -245,7 +245,10 @@ public static class BotKeyboards
             {
                 InlineKeyboardButton.WithCallbackData(
                     "🔙 Назад к списку",
-                    UiConstants.CallbackQueries.GetMilestones.BackToList)
+                    UiConstants.CallbackQueries.GetMilestones.BackToList),
+                InlineKeyboardButton.WithCallbackData(
+                    "🗑️ Удалить восспоминание",
+                    $"{UiConstants.CallbackQueries.DeleteMilestone.DeleteMilestoneCommand}{milestoneId.ToString()}"),
             }
         });
     }
@@ -265,6 +268,31 @@ public static class BotKeyboards
                 InlineKeyboardButton.WithCallbackData(
                     "❌ Отменить", 
                     "/cancel")
+            }
+        });
+    }
+
+    public static InlineKeyboardMarkup MilestoneDeleteConfirmationKeyboard(int milestoneId)
+    {
+        return new InlineKeyboardMarkup(new[]
+        {
+            new[]
+            {
+                InlineKeyboardButton.WithCallbackData(
+                    "🗑️ Да, удалить это воспоминание",
+                    $"{UiConstants.CallbackQueries.DeleteMilestone.ConfirmDeletePrefix}{milestoneId}"),
+            },
+            new[]
+            {
+                InlineKeyboardButton.WithCallbackData(
+                    "🔙 Нет, вернуться к просмотру",
+                    $"{UiConstants.CallbackQueries.GetMilestones.ItemPrefix}{milestoneId}"),
+            },
+            new[]
+            {
+                InlineKeyboardButton.WithCallbackData(
+                    "📜 Нет, назад к списку",
+                    UiConstants.CallbackQueries.GetMilestones.BackToList),
             }
         });
     }

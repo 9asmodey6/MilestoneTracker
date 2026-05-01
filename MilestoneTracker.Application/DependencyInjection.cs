@@ -10,6 +10,9 @@ using Common.Features.Children.ProvideAccess.Steps;
 using Common.Features.Milestones.AddMilestone;
 using Common.Features.Milestones.AddMilestone.Models;
 using Common.Features.Milestones.AddMilestone.Steps;
+using Common.Features.Milestones.DeleteMilestone;
+using Common.Features.Milestones.DeleteMilestone.Models;
+using Common.Features.Milestones.DeleteMilestone.Steps;
 using Common.Features.Milestones.GetMilestone;
 using Common.Features.Milestones.GetMilestone.Models;
 using Common.Features.Milestones.GetMilestone.Steps;
@@ -58,6 +61,11 @@ public static class DependencyInjection
         services.AddScoped<IStepHandler<GetMilestoneData>, DateStepGetHandler>();
         services.AddScoped<IStepHandler<GetMilestoneData>, ListStepGetHandler>();
         services.AddScoped<IStepHandler<GetMilestoneData>, ViewItemStepGetHandler>();
+        
+        // Delete milestone
+        services.AddScoped<IUserFlowHandler, ProcessDeleteMilestoneStepHandler>();
+        services.AddScoped<IStepHandler<DeleteMilestoneData>, ConfirmDeleteStepHandler>();
+        services.AddScoped<IStepHandler<DeleteMilestoneData>, UndoDeleteStepHandler>();
 
         // Provide access
         services.AddScoped<IUserFlowHandler, ProcessProvideStepAccessStepHandler>();

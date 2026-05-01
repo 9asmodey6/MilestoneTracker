@@ -47,6 +47,14 @@ public static class UiConstants
             public const string ItemPrefix = "vm_item_";
         }
 
+        public static class DeleteMilestone
+        {
+            public const string DeleteMilestoneCommand = "delete_milestone_";
+            public const string ConfirmDeletePrefix = "confirm_del_";
+            public const string AbortDelete = "deletion_aborted";
+            public const string RestoreCommand = "restore_milestone";
+        }
+
         public static class EditMilestone
         {
             public const string Confirm = "confirm_milestone";

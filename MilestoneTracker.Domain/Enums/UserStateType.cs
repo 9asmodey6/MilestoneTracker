@@ -33,4 +33,7 @@ public enum UserStateType
     
     GainAccessEnteringToken = 50,
     GainAccessConfirming = 51,
+    
+    DeleteMilestoneConfirming = 60,
+    DeleteMilestoneWaitingUndo = 61,
 }

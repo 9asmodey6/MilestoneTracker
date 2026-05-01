@@ -10,6 +10,8 @@ public class MilestoneConfiguration : IEntityTypeConfiguration<Milestone>
     {
         builder.HasKey(m => m.Id);
 
+        builder.HasQueryFilter(m => !m.IsDeleted);
+        
         builder.Property(m => m.Title)
             .IsRequired()
             .HasMaxLength(200);
