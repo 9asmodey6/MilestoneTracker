@@ -1,6 +1,6 @@
 namespace MilestoneTracker.Application.Common.Shared.Interfaces.Services;
 
-using MilestoneTracker.Domain.Entities.Milestones;
+using Domain.Entities.Milestones;
 using MilestoneTracker.Application.Common.Features.Milestones.GetMilestone.Models;
 
 public interface IMilestoneViewService

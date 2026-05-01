@@ -8,10 +8,7 @@ using Models;
 public static class MilestoneListMessageBuilder
 {
     private static readonly string[] Emojis = { "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣" };
-
-    /// <summary>
-    /// Формирует HTML-текст пагинированного списка воспоминаний.
-    /// </summary>
+    
     public static string BuildListMessage(
         GetMilestoneData data,
         List<Milestone> items,
@@ -60,9 +57,6 @@ public static class MilestoneListMessageBuilder
         return sb.ToString();
     }
 
-    /// <summary>
-    /// Рассчитывает количество страниц.
-    /// </summary>
     public static int CalculateTotalPages(int totalCount, int pageSize = 5)
         => Math.Max(1, (int)Math.Ceiling((double)totalCount / pageSize));
 

@@ -109,17 +109,7 @@ public class UpdateHandler(
         }
 
         var handler = handlerFactory.GetHandler(state.State);
-        if (handler != null)
-        {
-            await handler.HandleAsync(context, state, ct);
-        }
-        else
-        {
-            logger.LogWarning("No handler found for state {State} and callback data {Data}", state.State, data);
-            await botClient.SendMessage(context.ChatId, 
-                "😕 Не удалось обработать ваш выбор. Пожалуйста, используйте кнопки меню или введите /help.", 
-                cancellationToken: ct);
-        }
+        await handler.HandleAsync(context, state, ct);
     }
 
     private async Task HandleCommandAsync(BotContext context, CancellationToken ct)
@@ -152,18 +142,7 @@ public class UpdateHandler(
     private async Task HandleStatefulInteractionAsync(BotContext context, UserState state, CancellationToken ct)
     {
         var handler = handlerFactory.GetHandler(state.State);
-        if (handler != null)
-        {
-            await handler.HandleAsync(context, state, ct);
-        }
-        else
-        {
-            logger.LogWarning("No handler found for state {State} for chat {ChatId}", state.State, context.ChatId);
-            await stateService.ResetAsync(context.ChatId, ct);
-            await botClient.SendMessage(context.ChatId, 
-                "😕 Что-то пошло не так с текущим действием. Я сбросил состояние, пожалуйста, попробуйте еще раз.", 
-                cancellationToken: ct);
-        }
+        await handler.HandleAsync(context, state, ct);
     }
 
     private async Task HandleMenuButtonAsync(
@@ -175,11 +154,8 @@ public class UpdateHandler(
         {
             case UiConstants.ReplyButtons.AddChild:
                 var addChildHandler = handlerFactory.GetHandler(UserStateType.AddChildStarted);
-                if (addChildHandler != null)
-                {
-                    state.State = UserStateType.AddChildStarted;
-                    await addChildHandler.HandleAsync(context, state, ct);
-                }
+                state.State = UserStateType.AddChildStarted;
+                await addChildHandler.HandleAsync(context, state, ct);
                 break;
             case UiConstants.ReplyButtons.MyChildren:
                await mediator.Send(new GetChildrenQuery(
@@ -187,35 +163,23 @@ public class UpdateHandler(
                 break;
             case UiConstants.ReplyButtons.AddMilestone:
                 var addMilestoneHandler = handlerFactory.GetHandler(UserStateType.AddMilestoneStarted);
-                if (addMilestoneHandler != null)
-                {
-                    state.State = UserStateType.AddMilestoneStarted;
-                    await addMilestoneHandler.HandleAsync(context, state, ct);
-                }
+                state.State = UserStateType.AddMilestoneStarted;
+                await addMilestoneHandler.HandleAsync(context, state, ct);
                 break;
             case  UiConstants.ReplyButtons.ViewMilestones:
                 var getMilestoneHandler = handlerFactory.GetHandler(UserStateType.GetMilestoneSelectingChild);
-                if (getMilestoneHandler != null)
-                {
-                    state.State = UserStateType.GetMilestoneSelectingChild;
-                    await getMilestoneHandler.HandleAsync(context, state, ct);
-                }
+                state.State = UserStateType.GetMilestoneSelectingChild;
+                await getMilestoneHandler.HandleAsync(context, state, ct);
                 break;
             case UiConstants.ReplyButtons.ProvideAccessByToken:
                 state.State = UserStateType.ProvideAccessSelectingChild;
                 var provideAccessHandler = handlerFactory.GetHandler(state.State);
-                if (provideAccessHandler != null)
-                {
-                    await provideAccessHandler.HandleAsync(context, state, ct);
-                }
+                await provideAccessHandler.HandleAsync(context, state, ct);
                 break;
             case UiConstants.ReplyButtons.GainAccessByToken:
                 state.State = UserStateType.GainAccessEnteringToken;
                 var gainAccessHandler = handlerFactory.GetHandler(state.State);
-                if (gainAccessHandler != null)
-                {
-                    await gainAccessHandler.HandleAsync(context, state, ct);
-                }
+                await gainAccessHandler.HandleAsync(context, state, ct);
                 break;
             case UiConstants.ReplyButtons.Help:
                 await mediator.Send(new HelpCommand(context.ChatId), ct);
