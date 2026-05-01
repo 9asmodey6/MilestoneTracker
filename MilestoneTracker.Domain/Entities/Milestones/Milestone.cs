@@ -13,7 +13,7 @@ public class Milestone
     public string Title { get; set; } = null!;
     public string? Description { get; set; }
     public bool IsDeleted { get; set; } = false;
-    public int? DeletedBy { get; set; }
+    public long? DeletedBy { get; set; }
     public DateTime? DeletedAt { get; set; }
     
     

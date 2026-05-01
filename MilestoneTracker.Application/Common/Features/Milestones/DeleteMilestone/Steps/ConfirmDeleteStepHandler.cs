@@ -36,12 +36,17 @@ public class ConfirmDeleteStepHandler(
         // Performing deletion
         if (callbackData != null && callbackData.StartsWith(UiConstants.CallbackQueries.DeleteMilestone.ConfirmDeletePrefix))
         {
-            var milestone = await milestoneRepository.GetByIdAsync(data.MilestoneId, ct);
-            if (milestone != null)
-            {
-                milestone.IsDeleted = true;
-                milestone.DeletedAt = DateTime.UtcNow;
-                await milestoneRepository.UpdateAsync(milestone, ct);
+                var result = await milestoneRepository.SoftDeleteAsync(context.ChatId, data.MilestoneId, ct);
+
+                if (result == 0)
+                {
+                    await messageService.SendTextMessageAsync(
+                        context.ChatId,
+                        "<b>Произошла ошибка во время удаления восспоминания. Попробуйте ещё раз.</b>");
+                    await viewService.SendMilestoneListAsync(context.ChatId, data.ReturnContext, ct);
+                    await userStateService.UpdateAsync(context.ChatId, UserStateType.GetMilestoneList, data.ReturnContext, ct);
+                    return  new StepResult<DeleteMilestoneData>(UserStateType.Idle, null);
+                }
 
                 await messageService.SendMessageWithInlineKeyboardAsync(
                     context.ChatId,
@@ -54,7 +59,6 @@ public class ConfirmDeleteStepHandler(
                     ct);
 
                 return new StepResult<DeleteMilestoneData>(UserStateType.DeleteMilestoneWaitingUndo, data);
-            }
         }
 
         // Back to milestone list

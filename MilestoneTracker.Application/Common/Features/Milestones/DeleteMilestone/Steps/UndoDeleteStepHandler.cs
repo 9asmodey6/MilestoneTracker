@@ -31,7 +31,7 @@ public class UndoDeleteStepHandler(
         // Undo
         if (callbackData == UiConstants.CallbackQueries.DeleteMilestone.RestoreCommand)
         {
-            var milestone = await milestoneRepository.GetByIdAsync(data.MilestoneId, ct);
+            var milestone = await milestoneRepository.GetByIdWithDeletedAsync(data.MilestoneId, ct);
             if (milestone != null)
             {
                 milestone.IsDeleted = false;

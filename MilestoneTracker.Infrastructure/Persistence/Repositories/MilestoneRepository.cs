@@ -55,10 +55,29 @@ public class MilestoneRepository(
             .Include(m => m.MediaFiles)
             .FirstOrDefaultAsync(m => m.Id == id, ct);
     }
+    
+    public async Task<Milestone?> GetByIdWithDeletedAsync(int id, CancellationToken ct = default)
+    {
+        return await dbContext.Milestones
+            .IgnoreQueryFilters()
+            .Include(m => m.MediaFiles)
+            .FirstOrDefaultAsync(m => m.Id == id, ct);
+    }
 
     public async Task UpdateAsync(Milestone milestone, CancellationToken ct = default)
     {
         dbContext.Milestones.Update(milestone);
         await dbContext.SaveChangesAsync(ct);
+    }
+
+    public async Task<int> SoftDeleteAsync(long userChatId,int milestoneId, CancellationToken ct = default)
+    {
+        return await dbContext.Milestones.
+            Where(m => m.Id == milestoneId)
+            .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(m => m.IsDeleted, true)
+                    .SetProperty(m => m.DeletedAt, DateTime.UtcNow)
+                    .SetProperty(m => m.DeletedBy, userChatId), 
+                ct);
     }
 }

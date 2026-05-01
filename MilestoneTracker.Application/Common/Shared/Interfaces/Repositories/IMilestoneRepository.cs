@@ -15,5 +15,7 @@ public interface IMilestoneRepository
         CancellationToken ct = default);
 
     Task<Milestone?> GetByIdAsync(int id, CancellationToken ct = default);
+    Task<Milestone?> GetByIdWithDeletedAsync(int id, CancellationToken ct = default);
     Task UpdateAsync(Milestone milestone, CancellationToken ct = default);
+    Task<int> SoftDeleteAsync(long userChatId, int milestoneId, CancellationToken ct = default);
 }
