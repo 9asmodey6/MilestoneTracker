@@ -14,6 +14,8 @@ public class ChildConfiguration : IEntityTypeConfiguration<Child>
             .IsRequired()
             .HasMaxLength(100);
 
+        builder.HasQueryFilter(c => !c.IsDeleted);
+        
         builder.Property(c => c.PhotoFileId)
             .HasMaxLength(255);
         

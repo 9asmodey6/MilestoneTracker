@@ -16,7 +16,7 @@ public interface ITelegramMessageService
     Task SendMessageWithInlineKeyboardAsync(
         long chatId,
         string text,
-        InlineKeyboardMarkup keyboard,
+        InlineKeyboardMarkup? keyboard = null,
         CancellationToken ct = default);
 
     Task EditMessageTextAsync(
@@ -36,12 +36,14 @@ public interface ITelegramMessageService
         long chatId,
         string photoSource,
         string? caption = null,
+        ReplyMarkup? replyMarkup = null,
         CancellationToken ct = default);
 
     Task SendVideoAsync(
         long chatId,
         string videoSource,
         string? caption = null,
+        ReplyMarkup? replyMarkup = null,
         CancellationToken ct = default);
     
     Task SendMediaGroupAsync(

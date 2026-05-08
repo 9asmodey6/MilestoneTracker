@@ -31,7 +31,7 @@ public class MilestonePreviewService(ITelegramMessageService messageService) : I
                     chatId,
                     media.FileId,
                     summary,
-                    ct);
+                   ct: ct);
             }
             else if (media.Type == MediaType.Video)
             {
@@ -39,7 +39,7 @@ public class MilestonePreviewService(ITelegramMessageService messageService) : I
                     chatId,
                     media.FileId,
                     summary,
-                    ct);
+                   ct: ct);
             }
 
             await messageService.SendMessageWithInlineKeyboardAsync(

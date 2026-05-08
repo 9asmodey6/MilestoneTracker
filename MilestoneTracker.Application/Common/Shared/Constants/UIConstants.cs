@@ -40,6 +40,12 @@ public static class UiConstants
         public const string ActionViewMilestones = "action_view_milestones";
         public const string ActionRecoverMilestones = "action_recover_milestones";
 
+        public static class GetChild
+        {
+            public static string GetChildPrefix = "get_child_";
+            public static string GetChildBackToList = "get_child_back_to_list";
+        }
+        
         public static class GetMilestones
         {
             public const string GetMilestonesCommand = "get_milestones";

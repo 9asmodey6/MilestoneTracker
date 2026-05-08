@@ -45,6 +45,7 @@ public static class DependencyInjection
         
         services.AddScoped<IMilestonePreviewService, MilestonePreviewService>();
         services.AddScoped<IMilestoneViewService, MilestoneViewService>();
+        services.AddScoped<IChildViewService, ChildViewService>();
         // process milestone step handler
         services.AddScoped<IUserFlowHandler, ProcessMilestoneStepHandler>();
         // add milestone steps

@@ -24,7 +24,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Common\Features\Children\DeleteChild\" />
       <Folder Include="Common\Shared\Bot\" />
     </ItemGroup>
 

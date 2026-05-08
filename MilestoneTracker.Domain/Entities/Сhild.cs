@@ -10,6 +10,10 @@ public class Child
     public string? PhotoFileId { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     
+    public bool IsDeleted { get; set; } = false;
+    public long? DeletedBy { get; set; }
+    public DateTime? DeletedAt { get; set; }
+    
     public ICollection<Parent> Parents { get; set; } = new List<Parent>();
 
     public List<Milestone> Milestones { get; set; } = new();

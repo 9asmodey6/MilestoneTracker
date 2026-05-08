@@ -35,7 +35,7 @@ public class TelegramMessageService(
         }
     }
 
-    public async Task SendMessageWithInlineKeyboardAsync(long chatId, string text, InlineKeyboardMarkup keyboard,
+    public async Task SendMessageWithInlineKeyboardAsync(long chatId, string text, InlineKeyboardMarkup? keyboard = null,
         CancellationToken ct = default)
     {
         await SendTextMessageAsync(chatId, text, keyboard, ct);
@@ -83,6 +83,7 @@ public class TelegramMessageService(
         long chatId,
         string photoSource,
         string? caption = null,
+        ReplyMarkup? replyMarkup = null,
         CancellationToken ct = default)
     {
         try
@@ -95,6 +96,7 @@ public class TelegramMessageService(
                 chatId: chatId,
                 photo: photo,
                 caption: caption,
+                replyMarkup: replyMarkup,
                 parseMode: Telegram.Bot.Types.Enums.ParseMode.Html,
                 cancellationToken: ct
             );
@@ -111,6 +113,7 @@ public class TelegramMessageService(
         long chatId,
         string videoSource,
         string? caption = null,
+        ReplyMarkup? replyMarkup = null,
         CancellationToken ct = default)
     {
         try
@@ -123,6 +126,7 @@ public class TelegramMessageService(
                 chatId: chatId,
                 video: video,
                 caption: caption,
+                replyMarkup: replyMarkup,
                 parseMode: Telegram.Bot.Types.Enums.ParseMode.Html,
                 cancellationToken: ct
             );

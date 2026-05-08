@@ -1,14 +1,16 @@
-﻿namespace MilestoneTracker.Application.Common.Features.Children.GetChildren;
+namespace MilestoneTracker.Application.Common.Features.Children.GetChildren;
 
 using Domain.Entities.ValueObjects;
 using Interfaces;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Shared.Bot.Keyboards;
+using Shared.Interfaces.Services;
 
 public class GetChildrenHandler(
     IParentRepository repository,
     ITelegramMessageService messageService,
+    IChildViewService childViewService,
     ILogger<GetChildrenHandler> logger) : IRequestHandler<GetChildrenQuery, List<GetChildrenResponse>>
 {
     public async Task<List<GetChildrenResponse>> Handle(GetChildrenQuery request, CancellationToken cancellationToken)
@@ -31,30 +33,17 @@ public class GetChildrenHandler(
                 return new List<GetChildrenResponse>();
             }
 
+            foreach (var child in children)
+            {
+                await childViewService.SendChildCardAsync(request.ChatId, child, ct: cancellationToken);
+            }
+
             var response = children.Select(child => new GetChildrenResponse(
                 child.Id,
                 child.Name,
                 AgeInfo.Calculate(child.BirthDate, DateTime.UtcNow).ToString(),
                 child.PhotoFileId
             )).ToList();
-
-            foreach (var child in response)
-            {
-                var caption = 
-                    $"<b>👶 Ребенок:</b> {child.Name}\n" +
-                    $"<b>🎂 Возраст:</b> {child.Age}\n" +
-                    $"──────────────────\n" +
-                    $"<i>Выберите действие ниже, чтобы просмотреть вехи или изменить данные.</i>";
-                
-                if (!string.IsNullOrEmpty(child.PhotoFileId))
-                {
-                    await messageService.SendPhotoAsync(request.ChatId, child.PhotoFileId, caption, cancellationToken);
-                }
-                else
-                {
-                    await messageService.SendTextMessageAsync(request.ChatId, caption, ct: cancellationToken);
-                }
-            }
             
             return response;
         }

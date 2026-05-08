@@ -27,9 +27,9 @@ public class MilestoneViewService(
             var media = milestone.MediaFiles[0];
 
             if (media.Type == MediaType.Photo)
-                await messageService.SendPhotoAsync(chatId, media.FileId, summary, ct);
+                await messageService.SendPhotoAsync(chatId, media.FileId, summary, ct: ct);
             else if (media.Type == MediaType.Video)
-                await messageService.SendVideoAsync(chatId, media.FileId, summary, ct);
+                await messageService.SendVideoAsync(chatId, media.FileId, summary, ct: ct);
 
             await messageService.SendMessageWithInlineKeyboardAsync(
                 chatId, $"⬆️ Воспоминание выше. {actionMessage}", keyboard, ct);

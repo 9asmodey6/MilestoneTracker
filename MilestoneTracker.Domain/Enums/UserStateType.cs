@@ -39,4 +39,7 @@ public enum UserStateType
     
     RecoverMilestoneSelecting = 70,
     RecoverMilestoneConfirming = 71,
+    
+    GetChildrenSelecting = 80,
+    GetChildrenViewItem = 81,
 }

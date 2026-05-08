@@ -94,6 +94,37 @@ public static class BotKeyboards
         return new InlineKeyboardMarkup(buttons.Chunk(1));
     }
 
+    public static InlineKeyboardMarkup NumberedChildSelectionKeyboard(
+        List<Child> children,
+        string itemPrefix,
+        string backCallbackData,
+        string backButtonText = "🔙 Назад")
+    {
+        var buttons = new List<InlineKeyboardButton[]>();
+
+        var itemButtons = new List<InlineKeyboardButton>();
+        for (int i = 0; i < children.Count; i++)
+        {
+            itemButtons.Add(InlineKeyboardButton.WithCallbackData(
+                text: (i + 1).ToString(),
+                callbackData: $"{itemPrefix}{children[i].Id}"));
+        }
+
+        if (itemButtons.Any())
+        {
+            buttons.Add(itemButtons.ToArray());
+        }
+
+        buttons.Add(new[]
+        {
+            InlineKeyboardButton.WithCallbackData(
+                backButtonText,
+                backCallbackData)
+        });
+
+        return new InlineKeyboardMarkup(buttons);
+    }
+
     public static InlineKeyboardMarkup SelectCurrentDate()
     {
         string today = DateOnly.FromDateTime(DateTime.Today).ToString("yyyy-MM-dd");
