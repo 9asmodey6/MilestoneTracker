@@ -9,6 +9,7 @@ using Models;
 using Shared.Bot.Keyboards;
 using Shared.Interfaces.Repositories;
 using Shared.Models;
+using Shared.Services;
 using Shared.State;
 
 public class DateStepGetHandler(
@@ -64,12 +65,18 @@ public class DateStepGetHandler(
             return new StepResult<GetMilestoneData>(UserStateType.GetMilestoneSelectingDate, data);
         }
 
-        var totalPages = MilestoneListMessageBuilder.CalculateTotalPages(totalCount);
+        var totalPages = Shared.Services.MilestoneListMessageBuilder.CalculateTotalPages(totalCount);
 
         await messageService.SendMessageWithInlineKeyboardAsync(
             context.ChatId,
-            MilestoneListMessageBuilder.BuildListMessage(updatedData, items, updatedData.CurrentPage, totalPages),
-            BotKeyboards.PaginationKeyboard(updatedData.CurrentPage, totalPages, items),
+            Shared.Services.MilestoneListMessageBuilder.BuildListMessage(updatedData, items, updatedData.CurrentPage, totalPages),
+            BotKeyboards.PaginationKeyboard(
+                updatedData.CurrentPage, 
+                totalPages, 
+                items,
+                Constants.UiConstants.CallbackQueries.GetMilestones.ItemPrefix,
+                Constants.UiConstants.CallbackQueries.GetMilestones.PagePrefix,
+                Constants.UiConstants.CallbackQueries.GetMilestones.BackToList),
             ct);
 
         return new StepResult<GetMilestoneData>(UserStateType.GetMilestoneList, updatedData);

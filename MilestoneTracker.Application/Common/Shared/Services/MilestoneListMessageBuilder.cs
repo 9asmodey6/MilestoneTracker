@@ -1,9 +1,9 @@
-namespace MilestoneTracker.Application.Common.Features.Milestones.GetMilestone;
+namespace MilestoneTracker.Application.Common.Shared.Services;
 
 using System.Text;
 using Domain.Entities.Milestones;
 using Domain.Enums;
-using Models;
+using MilestoneTracker.Application.Common.Features.Milestones.GetMilestone.Models;
 
 public static class MilestoneListMessageBuilder
 {

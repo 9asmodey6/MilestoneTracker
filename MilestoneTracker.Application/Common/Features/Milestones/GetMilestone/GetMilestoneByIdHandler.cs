@@ -1,9 +1,11 @@
 namespace MilestoneTracker.Application.Common.Features.Milestones.GetMilestone;
 
+using Constants;
 using Interfaces;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Models;
+using Shared.Bot.Keyboards;
 using Shared.Interfaces.Repositories;
 using Shared.Interfaces.Services;
 
@@ -37,10 +39,19 @@ public class GetMilestoneByIdHandler(
             return Unit.Value;
         }
 
+        var keyboard = BotKeyboards.ViewMilestoneItemKeyboard(
+            milestone.Id,
+            UiConstants.CallbackQueries.GetMilestones.BackToList,
+            UiConstants.CallbackQueries.DeleteMilestone.DeleteMilestoneCommand,
+            "Удалить восспоминание",
+            "🗑️");
+
         await milestoneViewService.SendMilestoneCardAsync(
             query.ChatId,
             milestone,
             query.ChildName,
+            "Выберите действие:",
+            keyboard,
             cancellationToken);
 
         return Unit.Value;

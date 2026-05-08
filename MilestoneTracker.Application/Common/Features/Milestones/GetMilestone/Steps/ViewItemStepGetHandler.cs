@@ -18,6 +18,7 @@ public class ViewItemStepGetHandler(
     IMilestoneViewService viewService,
     ITelegramMessageService messageService,
     IUserStateService userStateService,
+    Shared.Interfaces.Repositories.IMilestoneRepository milestoneRepository,
     IMediator mediator,
     ILogger<ViewItemStepGetHandler> logger) : IStepHandler<GetMilestoneData>
 {
@@ -43,7 +44,25 @@ public class ViewItemStepGetHandler(
         // Back to list
         if (callbackData == UiConstants.CallbackQueries.GetMilestones.BackToList)
         {
-            await viewService.SendMilestoneListAsync(context.ChatId, data, ct);
+            var (items, totalCount) = await milestoneRepository.GetPaginatedAsync(
+                childId: data.ChildId!.Value,
+                pageNumber: data.CurrentPage,
+                category: data.Mode == ViewMode.Category ? data.SelectedCategory : null,
+                specificDate: data.Mode == ViewMode.Date ? data.SelectedDate : null,
+                ct: ct);
+
+            var totalPages = Shared.Services.MilestoneListMessageBuilder.CalculateTotalPages(totalCount);
+            
+            var text = Shared.Services.MilestoneListMessageBuilder.BuildListMessage(data, items, data.CurrentPage, totalPages);
+            var keyboard = BotKeyboards.PaginationKeyboard(
+                data.CurrentPage, 
+                totalPages, 
+                items,
+                UiConstants.CallbackQueries.GetMilestones.ItemPrefix,
+                UiConstants.CallbackQueries.GetMilestones.PagePrefix,
+                UiConstants.CallbackQueries.GetMilestones.BackToList);
+
+            await viewService.SendMilestoneListAsync(context.ChatId, text, keyboard, ct);
 
             return new StepResult<GetMilestoneData>(UserStateType.GetMilestoneList, data with { SelectedMilestoneId = null });
         }

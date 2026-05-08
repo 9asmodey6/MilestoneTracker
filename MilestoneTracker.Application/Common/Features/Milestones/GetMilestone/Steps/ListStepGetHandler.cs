@@ -14,6 +14,7 @@ using Models;
 using Shared.Bot.Keyboards;
 using Shared.Interfaces.Repositories;
 using Shared.Models;
+using Shared.Services;
 using Shared.State;
 
 public class ListStepGetHandler(
@@ -34,7 +35,13 @@ public class ListStepGetHandler(
             await messageService.SendMessageWithInlineKeyboardAsync(
                 context.ChatId,
                 "Пожалуйста, используйте кнопки для навигации или напишите /cancel для отмены.",
-                BotKeyboards.PaginationKeyboard(data.CurrentPage, 1, new()),
+                BotKeyboards.PaginationKeyboard(
+                    data.CurrentPage, 
+                    1, 
+                    new(),
+                    UiConstants.CallbackQueries.GetMilestones.ItemPrefix,
+                    UiConstants.CallbackQueries.GetMilestones.PagePrefix,
+                    UiConstants.CallbackQueries.GetMilestones.BackToList),
                 ct);
             return new StepResult<GetMilestoneData>(UserStateType.GetMilestoneList, data);
         }
@@ -71,8 +78,14 @@ public class ListStepGetHandler(
                 await messageService.EditMessageTextAsync(
                     context.ChatId,
                     context.MessageId.Value,
-                    MilestoneListMessageBuilder.BuildListMessage(updatedData, items, updatedData.CurrentPage, totalPages),
-                    BotKeyboards.PaginationKeyboard(updatedData.CurrentPage, totalPages, items),
+                    Shared.Services.MilestoneListMessageBuilder.BuildListMessage(updatedData, items, updatedData.CurrentPage, totalPages),
+                    BotKeyboards.PaginationKeyboard(
+                        updatedData.CurrentPage, 
+                        totalPages, 
+                        items,
+                        UiConstants.CallbackQueries.GetMilestones.ItemPrefix,
+                        UiConstants.CallbackQueries.GetMilestones.PagePrefix,
+                        UiConstants.CallbackQueries.GetMilestones.BackToList),
                     ct);
                 
                 return new StepResult<GetMilestoneData>(UserStateType.GetMilestoneList, updatedData);

@@ -10,6 +10,7 @@ using Models;
 using Shared.Bot.Keyboards;
 using Shared.Interfaces.Repositories;
 using Shared.Models;
+using Shared.Services;
 using Shared.State;
 
 public class CategoryStepGetHandler(
@@ -56,7 +57,7 @@ public class CategoryStepGetHandler(
             logger.LogDebug("No milestones found in category {Category} for chat {ChatId}",
                 selectedCategory, context.ChatId);
 
-            var categoryName = MilestoneListMessageBuilder.GetCategoryName(selectedCategory);
+            var categoryName = Shared.Services.MilestoneListMessageBuilder.GetCategoryName(selectedCategory);
             await messageService.SendMessageWithInlineKeyboardAsync(
                 context.ChatId,
                 $"🗂 <b>В категории {categoryName} пока нет воспоминаний.</b>\n\n" +
@@ -67,12 +68,18 @@ public class CategoryStepGetHandler(
             return new StepResult<GetMilestoneData>(UserStateType.GetMilestoneSelectingCategory, updatedData);
         }
 
-        var totalPages = MilestoneListMessageBuilder.CalculateTotalPages(totalCount);
+        var totalPages = Shared.Services.MilestoneListMessageBuilder.CalculateTotalPages(totalCount);
 
         await messageService.SendMessageWithInlineKeyboardAsync(
             context.ChatId,
-            MilestoneListMessageBuilder.BuildListMessage(updatedData, items, updatedData.CurrentPage, totalPages),
-            BotKeyboards.PaginationKeyboard(updatedData.CurrentPage, totalPages, items),
+            Shared.Services.MilestoneListMessageBuilder.BuildListMessage(updatedData, items, updatedData.CurrentPage, totalPages),
+            BotKeyboards.PaginationKeyboard(
+                updatedData.CurrentPage, 
+                totalPages, 
+                items,
+                UiConstants.CallbackQueries.GetMilestones.ItemPrefix,
+                UiConstants.CallbackQueries.GetMilestones.PagePrefix,
+                UiConstants.CallbackQueries.GetMilestones.BackToList),
             ct);
 
         return new StepResult<GetMilestoneData>(UserStateType.GetMilestoneList, updatedData);

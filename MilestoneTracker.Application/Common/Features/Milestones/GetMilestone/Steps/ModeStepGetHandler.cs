@@ -49,12 +49,18 @@ public class ModeStepGetHandler(
                 pageNumber: updatedData.CurrentPage,
                 ct: ct);
 
-            var totalPages = MilestoneListMessageBuilder.CalculateTotalPages(totalCount);
+            var totalPages = Shared.Services.MilestoneListMessageBuilder.CalculateTotalPages(totalCount);
 
             await messageService.SendMessageWithInlineKeyboardAsync(
                 context.ChatId,
-                MilestoneListMessageBuilder.BuildListMessage(updatedData, items, updatedData.CurrentPage, totalPages),
-                BotKeyboards.PaginationKeyboard(updatedData.CurrentPage, totalPages, items),
+                Shared.Services.MilestoneListMessageBuilder.BuildListMessage(updatedData, items, updatedData.CurrentPage, totalPages),
+                BotKeyboards.PaginationKeyboard(
+                    updatedData.CurrentPage, 
+                    totalPages, 
+                    items,
+                    UiConstants.CallbackQueries.GetMilestones.ItemPrefix,
+                    UiConstants.CallbackQueries.GetMilestones.PagePrefix,
+                    UiConstants.CallbackQueries.GetMilestones.BackToList),
                 ct);
             
             return new StepResult<GetMilestoneData>(UserStateType.GetMilestoneList, updatedData);

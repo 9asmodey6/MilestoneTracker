@@ -191,7 +191,14 @@ public static class BotKeyboards
         });
     }
 
-    public static InlineKeyboardMarkup PaginationKeyboard(int currentPage, int totalPages, List<Milestone> itemsOnPage)
+    public static InlineKeyboardMarkup PaginationKeyboard(
+        int currentPage, 
+        int totalPages, 
+        List<Milestone> itemsOnPage,
+        string itemPrefix,
+        string pagePrefix,
+        string backCallbackData,
+        string backButtonText = "🔙 К выбору режима")
     {
         var buttons = new List<InlineKeyboardButton[]>();
         
@@ -200,7 +207,7 @@ public static class BotKeyboards
         {
             itemButtons.Add(InlineKeyboardButton.WithCallbackData(
                 text: (i + 1).ToString(),
-                callbackData: $"{UiConstants.CallbackQueries.GetMilestones.ItemPrefix}{itemsOnPage[i].Id}"));
+                callbackData: $"{itemPrefix}{itemsOnPage[i].Id}"));
         }
         
         if (itemButtons.Any())
@@ -213,13 +220,13 @@ public static class BotKeyboards
         if (currentPage > 1)
         {
             navButtons.Add(InlineKeyboardButton.WithCallbackData(
-                "⬅️ Назад", $"{UiConstants.CallbackQueries.GetMilestones.PagePrefix}{currentPage - 1}"));
+                "⬅️ Назад", $"{pagePrefix}{currentPage - 1}"));
         }
         
         if (currentPage < totalPages)
         {
             navButtons.Add(InlineKeyboardButton.WithCallbackData(
-                "Вперед ➡️", $"{UiConstants.CallbackQueries.GetMilestones.PagePrefix}{currentPage + 1}"));
+                "Вперед ➡️", $"{pagePrefix}{currentPage + 1}"));
         }
 
         if (navButtons.Any())
@@ -230,14 +237,19 @@ public static class BotKeyboards
         buttons.Add(new[]
         {
             InlineKeyboardButton.WithCallbackData(
-                "🔙 К выбору режима", 
-                UiConstants.CallbackQueries.GetMilestones.BackToList)
+                backButtonText, 
+                backCallbackData)
         });
 
         return new InlineKeyboardMarkup(buttons);
     }
 
-    public static InlineKeyboardMarkup ViewMilestoneItemKeyboard(int milestoneId)
+    public static InlineKeyboardMarkup ViewMilestoneItemKeyboard(
+        int milestoneId,
+        string backCallbackData,
+        string actionCallbackData,
+        string actionButtonText,
+        string actionIcon = "🗑️")
     {
         return new InlineKeyboardMarkup(new[]
         {
@@ -245,10 +257,10 @@ public static class BotKeyboards
             {
                 InlineKeyboardButton.WithCallbackData(
                     "🔙 Назад к списку",
-                    UiConstants.CallbackQueries.GetMilestones.BackToList),
+                    backCallbackData),
                 InlineKeyboardButton.WithCallbackData(
-                    "🗑️ Удалить восспоминание",
-                    $"{UiConstants.CallbackQueries.DeleteMilestone.DeleteMilestoneCommand}{milestoneId.ToString()}"),
+                    $"{actionIcon} {actionButtonText}",
+                    $"{actionCallbackData}{milestoneId.ToString()}"),
             }
         });
     }

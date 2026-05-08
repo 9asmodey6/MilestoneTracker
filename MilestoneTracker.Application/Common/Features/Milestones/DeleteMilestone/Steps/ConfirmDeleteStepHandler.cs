@@ -43,7 +43,22 @@ public class ConfirmDeleteStepHandler(
                     await messageService.SendTextMessageAsync(
                         context.ChatId,
                         "<b>Произошла ошибка во время удаления восспоминания. Попробуйте ещё раз.</b>");
-                    await viewService.SendMilestoneListAsync(context.ChatId, data.ReturnContext, ct);
+                    var (items, totalCount) = await milestoneRepository.GetPaginatedAsync(
+                        childId: data.ReturnContext.ChildId!.Value,
+                        pageNumber: data.ReturnContext.CurrentPage,
+                        category: data.ReturnContext.Mode == GetMilestone.Models.ViewMode.Category ? data.ReturnContext.SelectedCategory : null,
+                        specificDate: data.ReturnContext.Mode == GetMilestone.Models.ViewMode.Date ? data.ReturnContext.SelectedDate : null,
+                        ct: ct);
+
+                    var totalPages = Shared.Services.MilestoneListMessageBuilder.CalculateTotalPages(totalCount);
+                    var text = Shared.Services.MilestoneListMessageBuilder.BuildListMessage(data.ReturnContext, items, data.ReturnContext.CurrentPage, totalPages);
+                    var keyboard = Shared.Bot.Keyboards.BotKeyboards.PaginationKeyboard(
+                        data.ReturnContext.CurrentPage, totalPages, items,
+                        UiConstants.CallbackQueries.GetMilestones.ItemPrefix,
+                        UiConstants.CallbackQueries.GetMilestones.PagePrefix,
+                        UiConstants.CallbackQueries.GetMilestones.BackToList);
+                        
+                    await viewService.SendMilestoneListAsync(context.ChatId, text, keyboard, ct);
                     await userStateService.UpdateAsync(context.ChatId, UserStateType.GetMilestoneList, data.ReturnContext, ct);
                     return  new StepResult<DeleteMilestoneData>(UserStateType.Idle, null);
                 }
@@ -64,7 +79,22 @@ public class ConfirmDeleteStepHandler(
         // Back to milestone list
         if (callbackData == UiConstants.CallbackQueries.GetMilestones.BackToList)
         {
-            await viewService.SendMilestoneListAsync(context.ChatId, data.ReturnContext, ct);
+            var (items, totalCount) = await milestoneRepository.GetPaginatedAsync(
+                childId: data.ReturnContext.ChildId!.Value,
+                pageNumber: data.ReturnContext.CurrentPage,
+                category: data.ReturnContext.Mode == GetMilestone.Models.ViewMode.Category ? data.ReturnContext.SelectedCategory : null,
+                specificDate: data.ReturnContext.Mode == GetMilestone.Models.ViewMode.Date ? data.ReturnContext.SelectedDate : null,
+                ct: ct);
+
+            var totalPages = Shared.Services.MilestoneListMessageBuilder.CalculateTotalPages(totalCount);
+            var text = Shared.Services.MilestoneListMessageBuilder.BuildListMessage(data.ReturnContext, items, data.ReturnContext.CurrentPage, totalPages);
+            var keyboard = Shared.Bot.Keyboards.BotKeyboards.PaginationKeyboard(
+                data.ReturnContext.CurrentPage, totalPages, items,
+                UiConstants.CallbackQueries.GetMilestones.ItemPrefix,
+                UiConstants.CallbackQueries.GetMilestones.PagePrefix,
+                UiConstants.CallbackQueries.GetMilestones.BackToList);
+
+            await viewService.SendMilestoneListAsync(context.ChatId, text, keyboard, ct);
             
             await userStateService.UpdateAsync(context.ChatId, UserStateType.GetMilestoneList, data.ReturnContext, ct);
             return new StepResult<DeleteMilestoneData>(UserStateType.GetMilestoneList, null);
@@ -76,7 +106,14 @@ public class ConfirmDeleteStepHandler(
             var milestone = await milestoneRepository.GetByIdAsync(data.MilestoneId, ct);
             if (milestone != null)
             {
-                await viewService.SendMilestoneCardAsync(context.ChatId, milestone, data.ReturnContext.ChildName, ct);
+                var keyboard = Shared.Bot.Keyboards.BotKeyboards.ViewMilestoneItemKeyboard(
+                    milestone.Id,
+                    UiConstants.CallbackQueries.GetMilestones.BackToList,
+                    UiConstants.CallbackQueries.DeleteMilestone.DeleteMilestoneCommand,
+                    "Удалить восспоминание",
+                    "🗑️");
+
+                await viewService.SendMilestoneCardAsync(context.ChatId, milestone, data.ReturnContext.ChildName, "Выберите действие:", keyboard, ct);
                 
                 await userStateService.UpdateAsync(context.ChatId, UserStateType.GetMilestoneViewItem, data.ReturnContext, ct);
                 return new StepResult<DeleteMilestoneData>(UserStateType.GetMilestoneViewItem, null);

@@ -1,28 +1,24 @@
-namespace MilestoneTracker.Application.Common.Features.Milestones.GetMilestone;
+namespace MilestoneTracker.Application.Common.Shared.Services;
 
 using System.Text;
-using Application.Common.Interfaces;
+using Common.Interfaces;
 using Domain.Entities.Milestones;
 using Domain.Enums;
+using Interfaces.Services;
 using Models;
-using Shared.Bot.Keyboards;
-using Shared.Interfaces.Repositories;
-using Shared.Interfaces.Services;
-using Shared.Models;
+using Telegram.Bot.Types.ReplyMarkups;
 
 public class MilestoneViewService(
-    ITelegramMessageService messageService,
-    IMilestoneRepository milestoneRepository) : IMilestoneViewService
+    ITelegramMessageService messageService) : IMilestoneViewService
 {
     public async Task SendMilestoneCardAsync(long chatId, Milestone milestone, string? childName,
-        CancellationToken ct)
+        string actionMessage, InlineKeyboardMarkup keyboard, CancellationToken ct)
     {
         var summary = BuildSummary(milestone, childName);
-        var keyboard = BotKeyboards.ViewMilestoneItemKeyboard(milestone.Id);
 
         if (milestone.MediaFiles.Count == 0)
         {
-            await messageService.SendMessageWithInlineKeyboardAsync(chatId, summary, keyboard, ct);
+            await messageService.SendMessageWithInlineKeyboardAsync(chatId, $"{summary}\n\n{actionMessage}", keyboard, ct);
             return;
         }
 
@@ -36,7 +32,7 @@ public class MilestoneViewService(
                 await messageService.SendVideoAsync(chatId, media.FileId, summary, ct);
 
             await messageService.SendMessageWithInlineKeyboardAsync(
-                chatId, "⬆️ Воспоминание выше. Выберите действие:", keyboard, ct);
+                chatId, $"⬆️ Воспоминание выше. {actionMessage}", keyboard, ct);
             return;
         }
         
@@ -46,24 +42,15 @@ public class MilestoneViewService(
 
         await messageService.SendMediaGroupAsync(chatId, mediaItems, ct);
         await messageService.SendMessageWithInlineKeyboardAsync(
-            chatId, "⬆️ Воспоминание выше. Выберите действие:", keyboard, ct);
+            chatId, $"⬆️ Воспоминание выше. {actionMessage}", keyboard, ct);
     }
 
-    public async Task SendMilestoneListAsync(long chatId, GetMilestoneData data, CancellationToken ct)
+    public async Task SendMilestoneListAsync(long chatId, string messageText, InlineKeyboardMarkup keyboard, CancellationToken ct)
     {
-        var (items, totalCount) = await milestoneRepository.GetPaginatedAsync(
-            childId: data.ChildId!.Value,
-            pageNumber: data.CurrentPage,
-            category: data.Mode == ViewMode.Category ? data.SelectedCategory : null,
-            specificDate: data.Mode == ViewMode.Date ? data.SelectedDate : null,
-            ct: ct);
-
-        var totalPages = MilestoneListMessageBuilder.CalculateTotalPages(totalCount);
-
         await messageService.SendMessageWithInlineKeyboardAsync(
             chatId,
-            MilestoneListMessageBuilder.BuildListMessage(data, items, data.CurrentPage, totalPages),
-            BotKeyboards.PaginationKeyboard(data.CurrentPage, totalPages, items),
+            messageText,
+            keyboard,
             ct);
     }
 
