@@ -16,6 +16,9 @@ using Common.Features.Milestones.DeleteMilestone.Steps;
 using Common.Features.Milestones.GetMilestone;
 using Common.Features.Milestones.GetMilestone.Models;
 using Common.Features.Milestones.GetMilestone.Steps;
+using Common.Features.Milestones.RestoreMilestone;
+using Common.Features.Milestones.RestoreMilestone.Models;
+using Common.Features.Milestones.RestoreMilestone.Steps;
 using Common.Interfaces;
 using Common.Shared.Interfaces.Services;
 using Common.Shared.Services;
@@ -78,6 +81,11 @@ public static class DependencyInjection
         services.AddScoped<IStepHandler<GainAccessByTokenCommand>, EnteringGainStepHandler>();
         services.AddScoped<IStepHandler<GainAccessByTokenCommand>, ConfirmingGainStepHandler>();
         
+        // Restore milestone
+        services.AddScoped<IUserFlowHandler, ProcessRecoverMilestoneHandler>();
+        services.AddScoped<IStepHandler<RecoverMilestoneData>, SelectingStepRecoverHandler>();
+        services.AddScoped<IStepHandler<RecoverMilestoneData>, ConfirmingStepRecoverHandler>();
+
         return services;
     }
 }

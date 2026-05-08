@@ -36,4 +36,7 @@ public enum UserStateType
     
     DeleteMilestoneConfirming = 60,
     DeleteMilestoneWaitingUndo = 61,
+    
+    RecoverMilestoneSelecting = 70,
+    RecoverMilestoneConfirming = 71,
 }

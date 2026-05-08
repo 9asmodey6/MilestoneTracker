@@ -6,6 +6,7 @@ using Application.Common.Commands.BotCommands.Help;
 using Application.Common.Constants;
 using Application.Common.Features.Children.GetChildren;
 using Application.Common.Interfaces;
+using Application.Common.Shared.Bot.Keyboards;
 using Application.Common.Shared.State;
 using Domain.Entities;
 using Domain.Enums;
@@ -20,6 +21,7 @@ public class UpdateHandler(
     ILogger<UpdateHandler> logger,
     IUserStateService stateService,
     UserFlowHandlerFactory handlerFactory,
+    ITelegramMessageService messageService,
     ITelegramBotClient botClient)
 {
     public async Task HandleUpdateAsync(Update update, CancellationToken ct)
@@ -108,6 +110,22 @@ public class UpdateHandler(
             return;
         }
 
+        if (data == UiConstants.CallbackQueries.ActionViewMilestones)
+        {
+            state.State = UserStateType.GetMilestoneSelectingChild;
+            var getMilestoneHandler = handlerFactory.GetHandler(state.State);
+            await getMilestoneHandler.HandleAsync(context, state, ct);
+            return;
+        }
+
+        if (data == UiConstants.CallbackQueries.ActionRecoverMilestones)
+        {
+            state.State = UserStateType.RecoverMilestoneSelecting;
+            var recoverMilestoneHandler = handlerFactory.GetHandler(state.State);
+            await recoverMilestoneHandler.HandleAsync(context, state, ct);
+            return;
+        }
+
         var handler = handlerFactory.GetHandler(state.State);
         await handler.HandleAsync(context, state, ct);
     }
@@ -152,6 +170,7 @@ public class UpdateHandler(
     {
         switch (context.Text)
         {
+            // Child actions
             case UiConstants.ReplyButtons.AddChild:
                 var addChildHandler = handlerFactory.GetHandler(UserStateType.AddChildStarted);
                 state.State = UserStateType.AddChildStarted;
@@ -161,16 +180,33 @@ public class UpdateHandler(
                await mediator.Send(new GetChildrenQuery(
                     context.ChatId), ct);
                 break;
+            
+            // Milestone actions
             case UiConstants.ReplyButtons.AddMilestone:
                 var addMilestoneHandler = handlerFactory.GetHandler(UserStateType.AddMilestoneStarted);
                 state.State = UserStateType.AddMilestoneStarted;
                 await addMilestoneHandler.HandleAsync(context, state, ct);
+                break;
+            case UiConstants.ReplyButtons.SelectMilestoneAction:
+                await messageService.SendMessageWithInlineKeyboardAsync(
+                    context.ChatId,
+                    "🗂 <b>Управление воспоминаниями</b>\n\nВыберите действие:",
+                    BotKeyboards.SelectMilestoneActionKeyboard,
+                    ct);
                 break;
             case  UiConstants.ReplyButtons.ViewMilestones:
                 var getMilestoneHandler = handlerFactory.GetHandler(UserStateType.GetMilestoneSelectingChild);
                 state.State = UserStateType.GetMilestoneSelectingChild;
                 await getMilestoneHandler.HandleAsync(context, state, ct);
                 break;
+            case UiConstants.ReplyButtons.RecoverMilestone:
+                var recoverMilestoneHandler = handlerFactory.GetHandler(UserStateType.RecoverMilestoneSelecting);
+                state.State = UserStateType.RecoverMilestoneSelecting;
+                await recoverMilestoneHandler.HandleAsync(context, state, ct);
+                break;
+            
+            
+            // Access to child actions
             case UiConstants.ReplyButtons.ProvideAccessByToken:
                 state.State = UserStateType.ProvideAccessSelectingChild;
                 var provideAccessHandler = handlerFactory.GetHandler(state.State);
@@ -181,6 +217,8 @@ public class UpdateHandler(
                 var gainAccessHandler = handlerFactory.GetHandler(state.State);
                 await gainAccessHandler.HandleAsync(context, state, ct);
                 break;
+            
+            
             case UiConstants.ReplyButtons.Help:
                 await mediator.Send(new HelpCommand(context.ChatId), ct);
                 break;
@@ -190,9 +228,13 @@ public class UpdateHandler(
     private bool IsMenuButton(string? text) => text switch
     {
         UiConstants.ReplyButtons.AddChild => true,
-        UiConstants.ReplyButtons.AddMilestone => true,
         UiConstants.ReplyButtons.MyChildren => true,
+        
+        UiConstants.ReplyButtons.SelectMilestoneAction  => true,
+        UiConstants.ReplyButtons.AddMilestone => true,
         UiConstants.ReplyButtons.ViewMilestones => true,
+        UiConstants.ReplyButtons.RecoverMilestone => true,
+        
         UiConstants.ReplyButtons.ProvideAccessByToken => true,
         UiConstants.ReplyButtons.GainAccessByToken => true,
         UiConstants.ReplyButtons.Help => true,

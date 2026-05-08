@@ -8,7 +8,41 @@ using MilestoneTracker.Application.Common.Features.Milestones.GetMilestone.Model
 public static class MilestoneListMessageBuilder
 {
     private static readonly string[] Emojis = { "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣" };
+
+    public static string BuildListMessage(
+        string header,
+        List<Milestone> items,
+        int currentPage,
+        int totalPages,
+        bool showChildName = false)
+    {
+        var sb = new StringBuilder();
+
+        sb.AppendLine($"{header} (стр. {currentPage}/{totalPages}):\n");
+        if (items.Count == 0)
+        {
+            sb.AppendLine("<i>Воспоминаний не найдено.</i>");
+        }
+        else
+        {
+            for (int i = 0; i < items.Count; i++)
+            {
+                var item = items[i];
+                var emoji = i < Emojis.Length ? Emojis[i] : $"{i + 1}.";
+                
+                var childTag = showChildName && item.Child != null
+                    ? $" [🧒 {item.Child.Name}]"
+                    : "";
+                sb.AppendLine($"{emoji} <b>{item.Title}</b>{childTag} (<i>{item.OccurredAt:dd.MM.yyyy}</i>)");
+            }
+
+            sb.AppendLine("\n<i>Выбери номер воспоминания, чтобы посмотреть его:</i>");
+        }
+
+        return sb.ToString();
+    }
     
+    // overload for filtered list
     public static string BuildListMessage(
         GetMilestoneData data,
         List<Milestone> items,
@@ -16,8 +50,7 @@ public static class MilestoneListMessageBuilder
         int totalPages)
     {
         var childName = data.ChildName ?? "ребёнка";
-        var sb = new StringBuilder();
-        
+
         var header = data.Mode switch
         {
             ViewMode.Category when data.SelectedCategory.HasValue =>
@@ -27,34 +60,7 @@ public static class MilestoneListMessageBuilder
             _ =>
                 $"📖 <b>Воспоминания {childName}</b>"
         };
-
-        sb.AppendLine($"{header} (стр. {currentPage}/{totalPages}):\n");
-
-        if (items.Count == 0)
-        {
-            var emptyText = data.Mode switch
-            {
-                ViewMode.Category when data.SelectedCategory.HasValue =>
-                    $"<i>В категории {GetCategoryName(data.SelectedCategory.Value)} пока нет воспоминаний.</i>",
-                ViewMode.Date when data.SelectedDate.HasValue =>
-                    $"<i>За {data.SelectedDate.Value:dd.MM.yyyy} воспоминаний не найдено.</i>",
-                _ =>
-                    "<i>Воспоминаний пока нет.</i>"
-            };
-            sb.AppendLine(emptyText);
-        }
-        else
-        {
-            for (int i = 0; i < items.Count; i++)
-            {
-                var item = items[i];
-                var emoji = i < Emojis.Length ? Emojis[i] : $"{i + 1}.";
-                sb.AppendLine($"{emoji} <b>{item.Title}</b> (<i>{item.OccurredAt:dd.MM.yyyy}</i>)");
-            }
-            sb.AppendLine("\n<i>Выбери номер воспоминания, чтобы посмотреть его:</i>");
-        }
-
-        return sb.ToString();
+        return BuildListMessage(header, items, currentPage, totalPages, showChildName: false);
     }
 
     public static int CalculateTotalPages(int totalCount, int pageSize = 5)

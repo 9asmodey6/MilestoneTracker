@@ -23,7 +23,7 @@ public class ChildStepGetHandler(
     {
         logger.LogInformation("Processing GetMilestone step was started for chat {ChatId}.",
             context.ChatId);
-
+        
         if (context.IsCallback)
         {
             if (!int.TryParse(context.CallbackData, out var childId))

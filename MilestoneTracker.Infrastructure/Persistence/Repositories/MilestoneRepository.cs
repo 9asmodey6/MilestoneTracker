@@ -7,7 +7,7 @@ using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 public class MilestoneRepository(
-    IAppDbContext dbContext): IMilestoneRepository
+    IAppDbContext dbContext) : IMilestoneRepository
 {
     public async Task<int> AddAsync(Milestone milestone, CancellationToken cancellationToken)
     {
@@ -15,10 +15,10 @@ public class MilestoneRepository(
         await dbContext.SaveChangesAsync(cancellationToken);
         return milestone.Id;
     }
-    
+
     public async Task<(List<Milestone> Items, int TotalCount)> GetPaginatedAsync(
-        int childId, 
-        int pageNumber, 
+        int childId,
+        int pageNumber,
         int pageSize = 5,
         MilestoneCategory? category = null,
         DateTime? specificDate = null,
@@ -26,26 +26,48 @@ public class MilestoneRepository(
     {
         var query = dbContext.Milestones
             .Where(m => m.ChildId == childId && !m.IsDeleted);
-        
+
         if (category.HasValue)
         {
             query = query.Where(m => m.Category == category.Value);
         }
-        
+
         if (specificDate.HasValue)
         {
             var date = specificDate.Value.Date;
             query = query.Where(m => m.OccurredAt.Date == date);
         }
-        
+
         int totalCount = await query.CountAsync(ct);
-        
+
         var items = await query
             .OrderByDescending(m => m.OccurredAt)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(ct);
-        
+
+        return (items, totalCount);
+    }
+
+    public async Task<(List<Milestone> Items, int TotalCount)> GetDeletedPaginatedAsync(
+        long userChatId,
+        int pageNumber,
+        int pageSize = 5,
+        CancellationToken ct = default)
+    {
+        var query = dbContext.Milestones
+            .IgnoreQueryFilters()
+            .Include(m => m.Child)
+            .Where(m => m.IsDeleted && m.DeletedBy == userChatId);
+
+        int totalCount = await query.CountAsync(ct);
+
+        var items = await query
+            .OrderByDescending(m => m.DeletedAt)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(ct);
+
         return (items, totalCount);
     }
 
@@ -53,14 +75,16 @@ public class MilestoneRepository(
     {
         return await dbContext.Milestones
             .Include(m => m.MediaFiles)
+            .Include(m => m.Child)
             .FirstOrDefaultAsync(m => m.Id == id, ct);
     }
-    
+
     public async Task<Milestone?> GetByIdWithDeletedAsync(int id, CancellationToken ct = default)
     {
         return await dbContext.Milestones
             .IgnoreQueryFilters()
             .Include(m => m.MediaFiles)
+            .Include(m => m.Child)
             .FirstOrDefaultAsync(m => m.Id == id, ct);
     }
 
@@ -70,14 +94,25 @@ public class MilestoneRepository(
         await dbContext.SaveChangesAsync(ct);
     }
 
-    public async Task<int> SoftDeleteAsync(long userChatId,int milestoneId, CancellationToken ct = default)
+    public async Task<int> SoftDeleteAsync(long userChatId, int milestoneId, CancellationToken ct = default)
     {
-        return await dbContext.Milestones.
-            Where(m => m.Id == milestoneId)
+        return await dbContext.Milestones.Where(m => m.Id == milestoneId)
             .ExecuteUpdateAsync(setters => setters
                     .SetProperty(m => m.IsDeleted, true)
                     .SetProperty(m => m.DeletedAt, DateTime.UtcNow)
-                    .SetProperty(m => m.DeletedBy, userChatId), 
+                    .SetProperty(m => m.DeletedBy, userChatId),
+                ct);
+    }
+
+    public async Task<int> RecoverAsync(int milestoneId, CancellationToken ct = default)
+    {
+        return await dbContext.Milestones
+            .IgnoreQueryFilters()
+            .Where(m => m.Id == milestoneId)
+            .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(m => m.IsDeleted, false)
+                    .SetProperty(m => m.DeletedAt, (DateTime?)null)
+                    .SetProperty(m => m.DeletedBy, (long?)null),
                 ct);
     }
 }

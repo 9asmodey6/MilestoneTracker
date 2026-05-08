@@ -6,12 +6,14 @@ public static class UiConstants
     {
         public const string AddChild = "➕ Добавить ребёнка";
         public const string MyChildren = "👶 Мои дети";
-        
+
+        public const string SelectMilestoneAction = "📜 Воспоминания";
         public const string AddMilestone = "➕ Добавить воспоминание";
-        public const string ViewMilestones = "📜 Воспоминания";
-        
+        public const string ViewMilestones = "📋 Посмотреть воспоминания";
+        public const string RecoverMilestone = "♻️ Восстановить восспоминание";
+
         public const string Help = "📋 Помощь";
-        
+
         public const string ProvideAccessByToken = "🍼 Поделиться доступом";
         public const string GainAccessByToken = "🔑 Добавить по коду";
     }
@@ -28,17 +30,20 @@ public static class UiConstants
         public const string AddChild = "add_child";
         public const string Skip = "skip";
         public const string FinishMediaUpload = "finish_media_upload";
-        
+
         public const string AddMoreMedia = "add_more_media";
 
         public const string SelectChild = "select_child";
 
         public const string SelectCategory = "select_category";
 
+        public const string ActionViewMilestones = "action_view_milestones";
+        public const string ActionRecoverMilestones = "action_recover_milestones";
+
         public static class GetMilestones
         {
             public const string GetMilestonesCommand = "get_milestones";
-            
+
             public const string ModeLatest = "vm_mode_latest";
             public const string ModeCategory = "vm_mode_cat";
             public const string ModeDate = "vm_mode_date";
@@ -64,6 +69,13 @@ public static class UiConstants
             public const string EditDate = "edit_date";
             public const string EditDescription = "edit_description";
             public const string EditMedia = "edit_media";
+        }
+
+        public static class RecoverMilestone
+        {
+            public const string PagePrefix = "rec_page_";
+            public const string ItemPrefix = "rec_item_";
+            public const string Confirm = "rec_confirm";
         }
     }
 }
