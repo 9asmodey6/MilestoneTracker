@@ -1,4 +1,4 @@
-﻿namespace MilestoneTracker.Application.Common.Features.Children.GetChildren;
+namespace MilestoneTracker.Application.Common.Features.Children.GetChildren;
 
 using System.Text.Json;
 using Domain.Entities;
@@ -51,7 +51,7 @@ public class ProcessGetChildrenStepHandler(
         {
             logger.LogError(ex, "Error processing Get Children step for ChatId: {ChatId}", context.ChatId);
             await messageService.SendTextMessageAsync(context.ChatId,
-                "❌ Произошла ошибка в процессе удаления.", ct: ct);
+                "❌ Произошла ошибка при получении списка детей.", ct: ct);
             await userStateService.ResetAsync(context.ChatId, ct);
         }
     }

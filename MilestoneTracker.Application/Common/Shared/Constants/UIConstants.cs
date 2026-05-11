@@ -30,13 +30,6 @@ public static class UiConstants
         public const string AddChild = "add_child";
         public const string Skip = "skip";
         public const string FinishMediaUpload = "finish_media_upload";
-
-        public const string AddMoreMedia = "add_more_media";
-
-        public const string SelectChild = "select_child";
-
-        public const string SelectCategory = "select_category";
-
         public const string ActionViewMilestones = "action_view_milestones";
         public const string ActionRecoverMilestones = "action_recover_milestones";
 
@@ -45,12 +38,18 @@ public static class UiConstants
             public static string GetChildPrefix = "get_child_";
             public static string GetChildBackToList = "get_child_back_to_list";
         }
+
+        public static class DeleteChild
+        {
+            public static string  DeleteChildPrefix = "delete_child_";
+        }
         
         public static class GetMilestones
         {
             public const string GetMilestonesCommand = "get_milestones";
 
             public const string ModeLatest = "vm_mode_latest";
+            public const string SelectChildPrefix = "select_child_";
             public const string ModeCategory = "vm_mode_cat";
             public const string ModeDate = "vm_mode_date";
             public const string BackToList = "vm_back_list";

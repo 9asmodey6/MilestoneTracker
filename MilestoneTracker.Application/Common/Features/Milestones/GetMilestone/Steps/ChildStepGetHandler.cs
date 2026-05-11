@@ -15,18 +15,24 @@ public class ChildStepGetHandler(
     ITelegramMessageService messageService,
     IUserStateService userStateService,
     ILogger<ChildStepGetHandler> logger) : IStepHandler<GetMilestoneData>
-{ 
+{
     public UserStateType Step => UserStateType.GetMilestoneSelectingChild;
-    
+
     public async Task<StepResult<GetMilestoneData>> HandleAsync(BotContext context, GetMilestoneData data,
         CancellationToken ct)
     {
         logger.LogInformation("Processing GetMilestone step was started for chat {ChatId}.",
             context.ChatId);
-        
-        if (context.IsCallback)
+
+        if (context.IsCallback && context.CallbackData != null &&
+            context.CallbackData.StartsWith(UiConstants.CallbackQueries.GetMilestones.SelectChildPrefix))
         {
-            if (!int.TryParse(context.CallbackData, out var childId))
+            var rawId = context.CallbackData.Replace(
+                UiConstants.CallbackQueries.GetMilestones.SelectChildPrefix,
+                string.Empty,
+                StringComparison.Ordinal);
+
+            if (!int.TryParse(rawId, out var childId))
             {
                 logger.LogWarning("Unable to parse child id from callback data: {CallbackData}", context.CallbackData);
                 await messageService.SendMessageWithInlineKeyboardAsync(
@@ -36,7 +42,7 @@ public class ChildStepGetHandler(
                     ct);
                 return new StepResult<GetMilestoneData>(UserStateType.GetMilestoneSelectingChild, data);
             }
-            
+
             var child = await parentRepository.GetChildByIdAsync(childId, ct);
 
             if (child == null)
@@ -51,8 +57,8 @@ public class ChildStepGetHandler(
             }
 
             var updatedData = data with { ChildId = child.Id, ChildName = child.Name };
-            
-            string messageText = 
+
+            string messageText =
                 $"✨ <b>Отлично!</b> Открываем воспоминания для <b>{child.Name}</b> 🍼\n\n" +
                 $"Выберите, как именно вы хотите просмотреть записи:\n" +
                 $"• <b>По хронологии</b> — лента от новых к старым.\n" +
@@ -63,7 +69,7 @@ public class ChildStepGetHandler(
             if (context.MessageId.HasValue)
             {
                 await messageService.EditMessageTextAsync(
-                    context.ChatId, 
+                    context.ChatId,
                     context.MessageId.Value,
                     messageText,
                     BotKeyboards.ViewMilestonesModeKeyboard(),
@@ -72,17 +78,16 @@ public class ChildStepGetHandler(
             else
             {
                 await messageService.SendMessageWithInlineKeyboardAsync(
-                    context.ChatId, 
+                    context.ChatId,
                     messageText,
                     BotKeyboards.ViewMilestonesModeKeyboard(),
                     ct);
             }
-            
+
             return new StepResult<GetMilestoneData>(UserStateType.GetMilestoneSelectingMode, updatedData);
         }
-        
+
         var children = await parentRepository.GetChildrenAsync(context.ChatId, ct);
-        
         if (children.Count == 0)
         {
             logger.LogWarning("Children not found for chat {ChatId}", context.ChatId);
@@ -99,8 +104,8 @@ public class ChildStepGetHandler(
         {
             var child = children[0];
             var updatedData = data with { ChildId = child.Id, ChildName = child.Name };
-            
-            string messageText = 
+
+            string messageText =
                 $"✨ <b>Отлично!</b> Открываем воспоминания для <b>{child.Name}</b> 🍼\n\n" +
                 $"Выберите, как именно вы хотите просмотреть записи:\n" +
                 $"• <b>По хронологии</b> — лента от новых к старым.\n" +
@@ -109,20 +114,19 @@ public class ChildStepGetHandler(
                 $"<i>Нажмите одну из кнопок ниже:</i> 👇";
 
             await messageService.SendMessageWithInlineKeyboardAsync(
-                context.ChatId, 
+                context.ChatId,
                 messageText,
                 BotKeyboards.ViewMilestonesModeKeyboard(),
                 ct);
-                
+
             return new StepResult<GetMilestoneData>(UserStateType.GetMilestoneSelectingMode, updatedData);
         }
-        
+
         await messageService.SendMessageWithInlineKeyboardAsync(
             context.ChatId,
             "<b>Чьи воспоминания вы хотите посмотреть?</b> 👶👧\n\nВыберите ребенка из списка ниже: 👇",
             BotKeyboards.ChildSelectionKeyboard(children),
             ct);
-            
         return new StepResult<GetMilestoneData>(UserStateType.GetMilestoneSelectingChild, data);
     }
 }

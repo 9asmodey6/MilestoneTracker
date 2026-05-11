@@ -69,15 +69,15 @@ public class UpdateHandler(
             }
 
             logger.LogWarning("Unhandled input from {ChatId}: {Text}", context.ChatId, context.Text);
-            await botClient.SendMessage(context.ChatId, 
-                "😕 Я не совсем понял, что вы имели в виду. Пожалуйста, воспользуйтесь кнопками меню или введите /help для справки.", 
+            await botClient.SendMessage(context.ChatId,
+                "😕 Я не совсем понял, что вы имели в виду. Пожалуйста, воспользуйтесь кнопками меню или введите /help для справки.",
                 cancellationToken: ct);
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Error handling update from {ChatId}", context.ChatId);
-            await botClient.SendMessage(context.ChatId, 
-                "❌ Произошла ошибка при обработке вашего запроса. Пожалуйста, попробуйте еще раз или используйте команду /cancel.", 
+            await botClient.SendMessage(context.ChatId,
+                "❌ Произошла ошибка при обработке вашего запроса. Пожалуйста, попробуйте еще раз или используйте команду /cancel.",
                 cancellationToken: ct);
         }
     }
@@ -118,6 +118,21 @@ public class UpdateHandler(
             return;
         }
 
+        if (data.StartsWith(UiConstants.CallbackQueries.GetMilestones.SelectChildPrefix))
+        {
+            if (int.TryParse(
+                    data.Replace(UiConstants.CallbackQueries.GetMilestones.SelectChildPrefix,
+                        string.Empty,
+                        StringComparison.Ordinal),
+                    out int itemId))
+            {
+                state.State = UserStateType.GetMilestoneSelectingChild;
+                var getMilestoneHandler = handlerFactory.GetHandler(state.State);
+                await getMilestoneHandler.HandleAsync(context, state, ct);
+                return;
+            }
+        }
+
         if (data == UiConstants.CallbackQueries.ActionRecoverMilestones)
         {
             state.State = UserStateType.RecoverMilestoneSelecting;
@@ -127,6 +142,12 @@ public class UpdateHandler(
         }
 
         var handler = handlerFactory.GetHandler(state.State);
+        if (handler == null)
+        {
+            logger.LogWarning("No handler found for state {State} in chat {ChatId}", state.State, context.ChatId);
+            return;
+        }
+
         await handler.HandleAsync(context, state, ct);
     }
 
@@ -144,14 +165,14 @@ public class UpdateHandler(
             case "/cancel":
                 await mediator.Send(new CancelCommand(context.ChatId), ct);
                 break;
-                
+
             case "/help":
                 await mediator.Send(new HelpCommand(context.ChatId), ct);
                 break;
-                
+
             default:
-                await botClient.SendMessage(context.ChatId, 
-                    "❓ Неизвестная команда. Введите /help, чтобы увидеть список доступных команд.", 
+                await botClient.SendMessage(context.ChatId,
+                    "❓ Неизвестная команда. Введите /help, чтобы увидеть список доступных команд.",
                     cancellationToken: ct);
                 break;
         }
@@ -160,6 +181,12 @@ public class UpdateHandler(
     private async Task HandleStatefulInteractionAsync(BotContext context, UserState state, CancellationToken ct)
     {
         var handler = handlerFactory.GetHandler(state.State);
+        if (handler == null)
+        {
+            logger.LogWarning("No handler found for state {State} in chat {ChatId}", state.State, context.ChatId);
+            return;
+        }
+
         await handler.HandleAsync(context, state, ct);
     }
 
@@ -177,10 +204,11 @@ public class UpdateHandler(
                 await addChildHandler.HandleAsync(context, state, ct);
                 break;
             case UiConstants.ReplyButtons.MyChildren:
-               await mediator.Send(new GetChildrenQuery(
-                    context.ChatId), ct);
+                var getChildrenHandler = handlerFactory.GetHandler(UserStateType.GetChildrenSelecting);
+                state.State = UserStateType.GetChildrenSelecting;
+                await getChildrenHandler.HandleAsync(context, state, ct);
                 break;
-            
+
             // Milestone actions
             case UiConstants.ReplyButtons.AddMilestone:
                 var addMilestoneHandler = handlerFactory.GetHandler(UserStateType.AddMilestoneStarted);
@@ -194,7 +222,7 @@ public class UpdateHandler(
                     BotKeyboards.SelectMilestoneActionKeyboard,
                     ct);
                 break;
-            case  UiConstants.ReplyButtons.ViewMilestones:
+            case UiConstants.ReplyButtons.ViewMilestones:
                 var getMilestoneHandler = handlerFactory.GetHandler(UserStateType.GetMilestoneSelectingChild);
                 state.State = UserStateType.GetMilestoneSelectingChild;
                 await getMilestoneHandler.HandleAsync(context, state, ct);
@@ -204,8 +232,8 @@ public class UpdateHandler(
                 state.State = UserStateType.RecoverMilestoneSelecting;
                 await recoverMilestoneHandler.HandleAsync(context, state, ct);
                 break;
-            
-            
+
+
             // Access to child actions
             case UiConstants.ReplyButtons.ProvideAccessByToken:
                 state.State = UserStateType.ProvideAccessSelectingChild;
@@ -217,8 +245,8 @@ public class UpdateHandler(
                 var gainAccessHandler = handlerFactory.GetHandler(state.State);
                 await gainAccessHandler.HandleAsync(context, state, ct);
                 break;
-            
-            
+
+
             case UiConstants.ReplyButtons.Help:
                 await mediator.Send(new HelpCommand(context.ChatId), ct);
                 break;
@@ -229,12 +257,12 @@ public class UpdateHandler(
     {
         UiConstants.ReplyButtons.AddChild => true,
         UiConstants.ReplyButtons.MyChildren => true,
-        
-        UiConstants.ReplyButtons.SelectMilestoneAction  => true,
+
+        UiConstants.ReplyButtons.SelectMilestoneAction => true,
         UiConstants.ReplyButtons.AddMilestone => true,
         UiConstants.ReplyButtons.ViewMilestones => true,
         UiConstants.ReplyButtons.RecoverMilestone => true,
-        
+
         UiConstants.ReplyButtons.ProvideAccessByToken => true,
         UiConstants.ReplyButtons.GainAccessByToken => true,
         UiConstants.ReplyButtons.Help => true,

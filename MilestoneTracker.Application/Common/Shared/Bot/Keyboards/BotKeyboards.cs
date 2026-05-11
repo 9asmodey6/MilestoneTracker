@@ -42,6 +42,25 @@ public static class BotKeyboards
                 UiConstants.CallbackQueries.ActionRecoverMilestones)
         }
     });
+    
+    public static InlineKeyboardMarkup SelectChildActionKeyboard(string childId)
+    {
+        return new InlineKeyboardMarkup(new[]
+        {
+            new[]
+            {
+                InlineKeyboardButton.WithCallbackData(
+                    "👀 Посмотреть воспоминания",
+                    UiConstants.CallbackQueries.GetMilestones.SelectChildPrefix + childId)
+            },
+            new[]
+            {
+                InlineKeyboardButton.WithCallbackData(
+                    "🗑 Удалить",
+                    UiConstants.CallbackQueries.DeleteChild.DeleteChildPrefix + childId)
+            }
+        });
+    }
 
     public static InlineKeyboardMarkup SkipKeyboard()
     {
@@ -88,7 +107,7 @@ public static class BotKeyboards
         var buttons = children.Select(child =>
             InlineKeyboardButton.WithCallbackData(
                 text: $"🧒 {child.Name}",
-                callbackData: child.Id.ToString()
+                callbackData: UiConstants.CallbackQueries.GetMilestones.SelectChildPrefix + child.Id.ToString()
             ));
 
         return new InlineKeyboardMarkup(buttons.Chunk(1));
