@@ -10,6 +10,8 @@ using MilestoneTracker.Application.Common.Shared.State;
 using MilestoneTracker.Domain.Enums;
 using MilestoneTracker.Infrastructure.Models;
 using Models;
+using Shared.Bot.Keyboards;
+using Shared.Services;
 using Telegram.Bot.Types.ReplyMarkups;
 
 public class ConfirmDeleteStepHandler(
@@ -50,9 +52,9 @@ public class ConfirmDeleteStepHandler(
                         specificDate: data.ReturnContext.Mode == GetMilestone.Models.ViewMode.Date ? data.ReturnContext.SelectedDate : null,
                         ct: ct);
 
-                    var totalPages = Shared.Services.MilestoneListMessageBuilder.CalculateTotalPages(totalCount);
-                    var text = Shared.Services.MilestoneListMessageBuilder.BuildListMessage(data.ReturnContext, items, data.ReturnContext.CurrentPage, totalPages);
-                    var keyboard = Shared.Bot.Keyboards.BotKeyboards.PaginationKeyboard(
+                    var totalPages = MilestoneListMessageBuilder.CalculateTotalPages(totalCount);
+                    var text = MilestoneListMessageBuilder.BuildListMessage(data.ReturnContext, items, data.ReturnContext.CurrentPage, totalPages);
+                    var keyboard = BotKeyboards.PaginationKeyboard(
                         data.ReturnContext.CurrentPage, totalPages, items,
                         UiConstants.CallbackQueries.GetMilestones.ItemPrefix,
                         UiConstants.CallbackQueries.GetMilestones.PagePrefix,

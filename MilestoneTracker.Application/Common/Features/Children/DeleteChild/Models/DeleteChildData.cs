@@ -4,5 +4,5 @@ using Constants;
 using GetChildren;
 
 public record DeleteChildData(
-    int ChildId,
-    GetChildrenData ReturnContext);
+    int? ChildId,
+    string ChildName);

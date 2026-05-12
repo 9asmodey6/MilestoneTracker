@@ -49,4 +49,81 @@ public class ParentRepository(
     {
         return dbContext.Children.FirstOrDefaultAsync(c => c.Id == childId, ct);
     }
+
+    public async Task<Child?> GetByIdWithDeletedAsync(int childId, CancellationToken ct = default)
+    {
+        return await dbContext.Children
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(m => m.Id == childId, ct);
+    }
+
+    public async Task<int> SoftDeleteAsync(long userChatId, int childId, CancellationToken ct = default)
+    {
+        using var transaction = await dbContext.Database.BeginTransactionAsync(ct);
+        try
+        {
+            var now = DateTime.UtcNow;
+
+            await dbContext.Milestones
+                .Where(m => m.ChildId == childId)
+                .ExecuteUpdateAsync(setters => setters
+                        .SetProperty(m => m.IsDeleted, true)
+                        .SetProperty(m => m.DeletedAt, now)
+                        .SetProperty(m => m.DeletedBy, userChatId),
+                    ct);
+            
+            var affectedRows = await dbContext.Children
+                .Where(c => c.Id == childId)
+                .ExecuteUpdateAsync(setters => setters
+                        .SetProperty(c => c.IsDeleted, true)
+                        .SetProperty(c => c.DeletedAt, now)
+                        .SetProperty(c => c.DeletedBy, userChatId),
+                    ct);
+            
+            await transaction.CommitAsync(ct);
+        
+            return affectedRows;
+        }
+        catch
+        {
+            await transaction.RollbackAsync(ct);
+            throw;
+        }
+    }
+
+    public async Task<int> RecoverAsync(int childId, CancellationToken cancellationToken = default)
+    {
+        using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+        try
+        {
+            var now = DateTime.UtcNow;
+
+            await dbContext.Milestones
+                .IgnoreQueryFilters()
+                .Where(m => m.ChildId == childId)
+                .ExecuteUpdateAsync(setters => setters
+                        .SetProperty(m => m.IsDeleted, false)
+                        .SetProperty(m => m.DeletedAt, (DateTime?)null)
+                        .SetProperty(m => m.DeletedBy, (long?)null),
+                    cancellationToken);
+            
+            var affectedRows = await dbContext.Children
+                .IgnoreQueryFilters()
+                .Where(c => c.Id == childId)
+                .ExecuteUpdateAsync(setters => setters
+                        .SetProperty(c => c.IsDeleted, false)
+                        .SetProperty(c => c.DeletedAt, (DateTime?)null)
+                        .SetProperty(c => c.DeletedBy, (long?)null),
+                    cancellationToken);
+            
+            await transaction.CommitAsync(cancellationToken);
+        
+            return affectedRows;
+        }
+        catch
+        {
+            await transaction.RollbackAsync(cancellationToken);
+            throw;
+        }
+    }
 }

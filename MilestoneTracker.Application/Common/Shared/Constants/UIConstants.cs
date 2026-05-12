@@ -42,6 +42,7 @@ public static class UiConstants
         public static class DeleteChild
         {
             public static string  DeleteChildPrefix = "delete_child_";
+            public static string  DeleteChildConfirmed = "delete_child_confirmed";
         }
         
         public static class GetMilestones

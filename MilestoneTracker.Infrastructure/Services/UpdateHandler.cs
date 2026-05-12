@@ -119,8 +119,18 @@ public class UpdateHandler(
         }
 
         // delete child
-        if (data.StartsWith(UiConstants.CallbackQueries.DeleteChild.DeleteChildPrefix))
+        if (data.StartsWith(UiConstants.CallbackQueries.DeleteChild.DeleteChildPrefix) || data == UiConstants.CallbackQueries.DeleteChild.DeleteChildConfirmed)
         {
+            
+            // delete child operation was confirmed
+            if (data == UiConstants.CallbackQueries.DeleteChild.DeleteChildConfirmed)
+            {
+                state.State = UserStateType.DeleteChildConfirming;
+                var deleteChildHandler = handlerFactory.GetHandler(state.State);
+                await deleteChildHandler.HandleAsync(context, state, ct);
+                return;
+            }
+            
             var rawId = data.Replace(UiConstants.CallbackQueries.DeleteChild.DeleteChildPrefix, string.Empty, StringComparison.Ordinal);
             if (int.TryParse(rawId, out int itemId))
             {

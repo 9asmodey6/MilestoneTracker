@@ -42,7 +42,7 @@ public static class BotKeyboards
                 UiConstants.CallbackQueries.ActionRecoverMilestones)
         }
     });
-    
+
     public static InlineKeyboardMarkup SelectChildActionKeyboard(string childId)
     {
         return new InlineKeyboardMarkup(new[]
@@ -112,6 +112,26 @@ public static class BotKeyboards
 
         return new InlineKeyboardMarkup(buttons.Chunk(1));
     }
+    
+    public static InlineKeyboardMarkup ChildDeleteConfirmationKeyboard()
+    {
+        return new InlineKeyboardMarkup(new[]
+        {
+            new[]
+            {
+                InlineKeyboardButton.WithCallbackData(
+                    "🗑️ Да, удалить ребёнка и воспоминания",
+                    UiConstants.CallbackQueries.DeleteChild.DeleteChildConfirmed)
+            },
+            new[]
+            {
+                InlineKeyboardButton.WithCallbackData(
+                    "❌ Отменить",
+                    "/cancel")
+            }
+        });
+    }
+
 
     public static InlineKeyboardMarkup NumberedChildSelectionKeyboard(
         List<Child> children,
@@ -373,21 +393,23 @@ public static class BotKeyboards
             }
         });
     }
+    
 
-    public static InlineKeyboardMarkup MilestoneRecoveryConfirmationKeyboard()
+public static InlineKeyboardMarkup MilestoneRecoveryConfirmationKeyboard()
+{
+    return new InlineKeyboardMarkup(new[]
     {
-        return new InlineKeyboardMarkup(new[]
+        new[]
         {
-            new[]
-            {
-                InlineKeyboardButton.WithCallbackData("✅ Восстановить",
-                    UiConstants.CallbackQueries.RecoverMilestone.Confirm)
-            },
-            new[]
-            {
-                InlineKeyboardButton.WithCallbackData("❌ Отменить",
-                    "/cancel")
-            }
-        });
-    }
+            InlineKeyboardButton.WithCallbackData("✅ Восстановить",
+                UiConstants.CallbackQueries.RecoverMilestone.Confirm)
+        },
+        new[]
+        {
+            InlineKeyboardButton.WithCallbackData("❌ Отменить",
+                "/cancel")
+        }
+    });
+}
+
 }
