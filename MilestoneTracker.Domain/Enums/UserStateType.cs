@@ -42,4 +42,7 @@ public enum UserStateType
     
     GetChildrenSelecting = 80,
     GetChildrenViewItem = 81,
+    
+    DeleteChildConfirming = 90,
+    DeleteChildWaitingUndo = 91,
 }

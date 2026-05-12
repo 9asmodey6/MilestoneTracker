@@ -1,4 +1,4 @@
-﻿namespace MilestoneTracker.Application.Common.Features.Children.GetChildren.Steps;
+namespace MilestoneTracker.Application.Common.Features.Children.GetChildren.Steps;
 
 using Constants;
 using Domain.Enums;
@@ -46,14 +46,14 @@ public class ViewChildStepHandler(
             return new StepResult<GetChildrenData>(UserStateType.GetChildrenViewItem, data);
         }
 
-        if (context.CallbackData != null &&
-            context.CallbackData.StartsWith(UiConstants.CallbackQueries.GetChild.GetChildPrefix))
+        if (context.IsCallback && (context.Payload != null || (context.CallbackData != null &&
+            context.CallbackData.StartsWith(UiConstants.CallbackQueries.GetChild.GetChildPrefix))))
         {
-            if (int.TryParse(
-                    context.CallbackData.Replace(UiConstants.CallbackQueries.GetChild.GetChildPrefix,
+            var rawId = context.Payload ?? context.CallbackData!.Replace(UiConstants.CallbackQueries.GetChild.GetChildPrefix,
                         string.Empty,
-                        StringComparison.Ordinal),
-                    out int itemId))
+                        StringComparison.Ordinal);
+
+            if (int.TryParse(rawId, out int itemId))
             {
                 var child = await parentRepository.GetChildByIdAsync(itemId, ct);
                 if (child == null)

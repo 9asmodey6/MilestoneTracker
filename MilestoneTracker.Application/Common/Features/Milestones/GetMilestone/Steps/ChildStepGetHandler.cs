@@ -25,16 +25,17 @@ public class ChildStepGetHandler(
             context.ChatId);
 
         if (context.IsCallback && context.CallbackData != null &&
-            context.CallbackData.StartsWith(UiConstants.CallbackQueries.GetMilestones.SelectChildPrefix))
+            (context.Payload != null || context.CallbackData.StartsWith(UiConstants.CallbackQueries.GetMilestones.SelectChildPrefix)))
         {
-            var rawId = context.CallbackData.Replace(
+            var rawId = context.Payload ?? context.CallbackData.Replace(
                 UiConstants.CallbackQueries.GetMilestones.SelectChildPrefix,
                 string.Empty,
                 StringComparison.Ordinal);
 
             if (!int.TryParse(rawId, out var childId))
             {
-                logger.LogWarning("Unable to parse child id from callback data: {CallbackData}", context.CallbackData);
+                logger.LogWarning("Unable to parse child id from payload: {Payload} or callback data: {CallbackData}", 
+                    context.Payload, context.CallbackData);
                 await messageService.SendMessageWithInlineKeyboardAsync(
                     context.ChatId,
                     "Пожалуйста, выберите ребенка, используя кнопки ниже.",

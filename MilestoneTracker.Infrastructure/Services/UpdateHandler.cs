@@ -118,21 +118,46 @@ public class UpdateHandler(
             return;
         }
 
-        if (data.StartsWith(UiConstants.CallbackQueries.GetMilestones.SelectChildPrefix))
+        // delete child
+        if (data.StartsWith(UiConstants.CallbackQueries.DeleteChild.DeleteChildPrefix))
         {
-            if (int.TryParse(
-                    data.Replace(UiConstants.CallbackQueries.GetMilestones.SelectChildPrefix,
-                        string.Empty,
-                        StringComparison.Ordinal),
-                    out int itemId))
+            var rawId = data.Replace(UiConstants.CallbackQueries.DeleteChild.DeleteChildPrefix, string.Empty, StringComparison.Ordinal);
+            if (int.TryParse(rawId, out int itemId))
             {
-                state.State = UserStateType.GetMilestoneSelectingChild;
-                var getMilestoneHandler = handlerFactory.GetHandler(state.State);
-                await getMilestoneHandler.HandleAsync(context, state, ct);
+                state.State = UserStateType.DeleteChildConfirming;
+                var deleteChildHandler = handlerFactory.GetHandler(state.State);
+                await deleteChildHandler.HandleAsync(context with { Payload = rawId }, state, ct);
                 return;
             }
         }
 
+        // get child details (My Children list)
+        if (data.StartsWith(UiConstants.CallbackQueries.GetChild.GetChildPrefix))
+        {
+            var rawId = data.Replace(UiConstants.CallbackQueries.GetChild.GetChildPrefix, string.Empty, StringComparison.Ordinal);
+            if (int.TryParse(rawId, out int itemId))
+            {
+                state.State = UserStateType.GetChildrenViewItem;
+                var getChildrenHandler = handlerFactory.GetHandler(state.State);
+                await getChildrenHandler.HandleAsync(context with { Payload = rawId }, state, ct);
+                return;
+            }
+        }
+
+        // select child for milestones
+        if (data.StartsWith(UiConstants.CallbackQueries.GetMilestones.SelectChildPrefix))
+        {
+            var rawId = data.Replace(UiConstants.CallbackQueries.GetMilestones.SelectChildPrefix, string.Empty, StringComparison.Ordinal);
+            if (int.TryParse(rawId, out int itemId))
+            {
+                state.State = UserStateType.GetMilestoneSelectingChild;
+                var getMilestoneHandler = handlerFactory.GetHandler(state.State);
+                await getMilestoneHandler.HandleAsync(context with { Payload = rawId }, state, ct);
+                return;
+            }
+        }
+
+        // recover milestone started
         if (data == UiConstants.CallbackQueries.ActionRecoverMilestones)
         {
             state.State = UserStateType.RecoverMilestoneSelecting;

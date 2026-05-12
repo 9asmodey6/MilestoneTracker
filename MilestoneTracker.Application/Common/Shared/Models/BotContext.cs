@@ -1,4 +1,4 @@
-﻿namespace MilestoneTracker.Infrastructure.Models;
+namespace MilestoneTracker.Infrastructure.Models;
 
 using Microsoft.EntityFrameworkCore;
 using Telegram.Bot.Types;
@@ -10,6 +10,7 @@ public record BotContext
     public string? Text { get; init; }
     public string? CallbackData { get; init; }
     public string? CallbackQueryId { get; init; }
+    public string? Payload { get; init; }
 
     public bool IsCallback => !string.IsNullOrEmpty(CallbackQueryId);
 
