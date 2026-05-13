@@ -53,7 +53,6 @@ public static class DependencyInjection
         services.AddSingleton<ITelegramDateParser, TelegramDateParser>();
         
         services.AddScoped<UserFlowHandlerFactory>();
-        services.AddScoped<IUserFlowHandler, ProcessChildStepHandler>();
         
         return services;
     }

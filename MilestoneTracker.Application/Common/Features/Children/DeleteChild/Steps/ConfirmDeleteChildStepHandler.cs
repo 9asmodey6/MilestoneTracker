@@ -1,4 +1,4 @@
-﻿namespace MilestoneTracker.Application.Common.Features.Children.DeleteChild.Steps;
+namespace MilestoneTracker.Application.Common.Features.Children.DeleteChild.Steps;
 
 using Constants;
 using Domain.Enums;
@@ -62,7 +62,12 @@ public class ConfirmDeleteChildStepHandler(
 
                 await messageService.SendMessageWithInlineKeyboardAsync(
                     context.ChatId,
-                    "Напиши тут красиво с разметкой HTML мол вы уверены что хотите удалить ребенка {child.Name} и все его восспоминания? Можно будет потом восстановить скажи",
+                    $"🗑 <b>Удаление профиля ребёнка</b>\n\n" +
+                    $"Вы уверены, что хотите удалить профиль <b>{child.Name}</b>?\n\n" +
+                    $"⚠️ <b>Это действие приведёт к следующим последствиям:</b>\n" +
+                    $"• Все воспоминания, связанные с ребёнком, будут скрыты.\n" +
+                    $"• Доступ к профилю для других пользователей будет заблокирован.\n\n" +
+                    $"<i>Вы сможете восстановить данные в течение некоторого времени после удаления.</i>",
                     BotKeyboards.ChildDeleteConfirmationKeyboard(),
                     ct: ct);
 

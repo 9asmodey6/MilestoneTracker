@@ -4,6 +4,9 @@ using System.Reflection;
 using AsyncKeyedLock;
 using Common.Behaviors;
 using Common.Features.Children.AddChild;
+using Common.Features.Children.DeleteChild;
+using Common.Features.Children.DeleteChild.Models;
+using Common.Features.Children.DeleteChild.Steps;
 using Common.Features.Children.GainAccess;
 using Common.Features.Children.GainAccess.Steps;
 using Common.Features.Children.GetChildren;
@@ -97,6 +100,11 @@ public static class DependencyInjection
         services.AddScoped<IUserFlowHandler, ProcessRecoverMilestoneHandler>();
         services.AddScoped<IStepHandler<RecoverMilestoneData>, SelectingStepRecoverHandler>();
         services.AddScoped<IStepHandler<RecoverMilestoneData>, ConfirmingStepRecoverHandler>();
+
+        // Delete child
+        services.AddScoped<IUserFlowHandler, ProcessDeleteChildStepHandler>();
+        services.AddScoped<IStepHandler<DeleteChildData>, ConfirmDeleteChildStepHandler>();
+        services.AddScoped<IStepHandler<DeleteChildData>, UndoDeleteChildStepHandler>();
 
         return services;
     }
