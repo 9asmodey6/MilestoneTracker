@@ -17,7 +17,7 @@ public class WebhookController(ILogger<WebhookController> logger) : ControllerBa
         CancellationToken ct)
     {
         logger.LogInformation(
-            "---> [WEBHOOK] Update ID: {UpdateId}, Type: {UpdateType}",
+            "Update ID: {UpdateId}, Type: {UpdateType}",
             update.Id,
             update.Type);
 
@@ -32,7 +32,4 @@ public class WebhookController(ILogger<WebhookController> logger) : ControllerBa
 
         return Ok();
     }
-
-    [HttpGet]
-    public string Get() => "Узел связи MilestoneTracker активен! 🫡";
 }

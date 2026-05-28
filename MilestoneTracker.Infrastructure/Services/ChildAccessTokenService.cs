@@ -6,8 +6,9 @@ using Application.Common.Shared.Models;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
+using Microsoft.Extensions.Logging;
 
-public class ChildAccessTokenService(IAppDbContext dbContext) : IChildAccessTokenService
+public class ChildAccessTokenService(IAppDbContext dbContext, ILogger<ChildAccessTokenService> logger) : IChildAccessTokenService
 {
     public async Task<Result<ChildAccessToken>> GenerateTokenAsync(int childId, int creatorId, int validityHours = 24,  CancellationToken ct = default)
     {
@@ -75,6 +76,19 @@ public class ChildAccessTokenService(IAppDbContext dbContext) : IChildAccessToke
         await dbContext.SaveChangesAsync(CancellationToken.None);
 
         return Result.Success();
+    }
+
+    public async Task<int> ClearInvalidTokensAsync(CancellationToken ct = default)
+    {
+        var now = DateTime.UtcNow;
+        var affectedRows =  await dbContext.AccessTokens
+            .Where(t => t.IsUsed 
+                        || t.ExpiresAt < now 
+                        || t.CurrentUses >= t.MaxUses)
+            .ExecuteDeleteAsync(ct);
+        
+        logger.LogInformation("Clear invalid tokens: {Count}", affectedRows);
+        return affectedRows;
     }
 
     private static string GenerateSecureToken()

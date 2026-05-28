@@ -1,3 +1,4 @@
+using Hangfire;
 using MilestoneTracker.Application;
 using MilestoneTracker.Infrastructure;
 using Serilog;
@@ -31,11 +32,14 @@ app.UseSerilogRequestLogging(options =>
 if (app.Environment.IsDevelopment())
 {
     app.ApplyMigrations();
+    app.UseHangfireDashboard(); 
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
 app.MapHealthChecks("/health");
+
+app.UseHangfireRecurringJobs();
 
 app.MapControllers();
 app.Run();

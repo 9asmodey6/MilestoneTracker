@@ -6,6 +6,8 @@ using Application.Common.Shared.Interfaces;
 using Application.Common.Shared.Interfaces.Repositories;
 using Application.Common.Shared.Interfaces.Services;
 using Application.Common.Shared.State;
+using Hangfire;
+using Hangfire.PostgreSql;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -34,29 +36,38 @@ public static class DependencyInjection
         services.AddDbContext<AppDbContext>(options =>
             options.UseNpgsql(dbOptions.ConnectionString)
                 .UseSnakeCaseNamingConvention());
-        
+
+        services.AddHangfire(cfg =>
+            cfg.UsePostgreSqlStorage(options => options.UseNpgsqlConnection(dbOptions.ConnectionString))
+                .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+                .UseSimpleAssemblyNameTypeSerializer()
+                .UseRecommendedSerializerSettings()
+        );
+        services.AddHangfireServer();
+
         services.AddScoped<IAppDbContext>(sp => sp.GetRequiredService<AppDbContext>());
-        
+
         services.AddScoped<UpdateHandler>();
         services.AddSingleton<UpdateChannelQueue>();
         services.AddHostedService<UpdateWorker>();
+        services.AddHostedService<WebhookConfigurationWorker>();
 
-        services.AddScoped<ITelegramMessageService, TelegramMessageService>(); 
-        
+        services.AddScoped<ITelegramMessageService, TelegramMessageService>();
+
         services.AddScoped<IParentRepository, ParentRepository>();
         services.AddScoped<IUserStateRepository, UserStateRepository>();
         services.AddScoped<IMilestoneRepository, MilestoneRepository>();
-        
+
         services.AddScoped<IUserStateService, UserStateService>();
         services.AddScoped<IChildAccessTokenService, ChildAccessTokenService>();
-        
+
         services.AddSingleton<ITelegramDateParser, TelegramDateParser>();
-        
+
         services.AddScoped<UserFlowHandlerFactory>();
-        
+
         return services;
     }
-    
+
     public static IServiceCollection ApplyConfigurations(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<TelegramOptions>(
