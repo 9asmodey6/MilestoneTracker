@@ -89,8 +89,37 @@ public class ConfirmDeleteChildStepHandler(
             }
 
             var child = await parentRepository.GetChildByIdAsync(data.ChildId.Value, ct);
+            if (child == null)
+            {
+                logger.LogError("ChildId is missing in data for chat {chatId}", context.ChatId);
+                await messageService.SendTextMessageAsync(
+                    context.ChatId,
+                    "⚠️ <b>Произошла ошибка!</b>\n\nПожалуйста попробуйтё ещё раз через главное меню!",
+                    ct: ct);
+                await userStateService.ResetAsync(context.ChatId, ct);
+                return new StepResult<DeleteChildData>(UserStateType.Idle, null);
+            }
 
-            // TODO: Дописать удаление ребёнка и его восспоминаний и сразу же вариант отката удаления.
+            var isSuccess = await parentRepository.SoftDeleteAsync(context.ChatId, data.ChildId.Value, ct) == 1;
+
+            if (!isSuccess)
+            {
+                logger.LogError("Error while processing soft child deletion for chat {chatId}", context.ChatId);
+                await messageService.SendTextMessageAsync(
+                    context.ChatId,
+                    "⚠️ <b>Произошла ошибка!</b>\n\nПожалуйста попробуйтё ещё раз через главное меню!",
+                    ct: ct);
+                await userStateService.ResetAsync(context.ChatId, ct);
+                return new StepResult<DeleteChildData>(UserStateType.Idle, null);
+            }
+
+            await messageService.SendMessageWithInlineKeyboardAsync(
+                context.ChatId,
+                $"⚠️ <b>Ребёнок {data.ChildName} удалён</b>\n\nВы сможете восстановить его и все его восспоминания <i>из меню или нажав кнопку ниже</i>",
+                BotKeyboards.UndoChildDeletionKeyboard(data.ChildId.Value),
+                ct);
+
+            await userStateService.ResetAsync(context.ChatId, ct);
         }
 
         return new StepResult<DeleteChildData>(UserStateType.Idle, null);

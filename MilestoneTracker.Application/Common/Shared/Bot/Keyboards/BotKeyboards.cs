@@ -37,6 +37,16 @@ public static class BotKeyboards
         }
     });
 
+    public static InlineKeyboardMarkup UndoChildDeletionKeyboard(int childId) => new InlineKeyboardMarkup(new []
+    {
+        new[]
+        {
+            InlineKeyboardButton.WithCallbackData(
+                "✅ Восстановить",
+                UiConstants.CallbackQueries.RecoverChild.RecoverChildPrefix + childId)
+        },
+    });
+
     public static InlineKeyboardMarkup SelectMilestoneActionKeyboard => new InlineKeyboardMarkup(new[]
     {
         new[]
