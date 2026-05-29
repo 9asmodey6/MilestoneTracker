@@ -5,6 +5,7 @@ using Infrastructure.Models;
 using Interfaces;
 using Microsoft.Extensions.Logging;
 using Shared.Bot.Keyboards;
+using Shared.Interfaces.Services;
 using Shared.Models;
 using Shared.State;
 
@@ -12,6 +13,7 @@ public class ChildProvideStepHandler(
     ITelegramMessageService messageService,
     IParentRepository parentRepository,
     IUserStateService userStateService,
+    IChildAccessTokenService tokenService,
     ILogger<ChildProvideStepHandler> logger) : IStepHandler<ProvideAccessData>
 {
     public UserStateType Step => UserStateType.ProvideAccessSelectingChild;
@@ -35,9 +37,24 @@ public class ChildProvideStepHandler(
             await userStateService.ResetAsync(context.ChatId, ct);
             return new StepResult<ProvideAccessData>(UserStateType.Idle, null);
         }
-
+        
         if (children.Count == 1)
         {
+            var tokens = await tokenService.GetChildAccessTokensAsync(children[0].Id, ct);
+            
+            if (tokens.Count >= 1)
+            {
+                await messageService.SendMessageWithInlineKeyboardAsync(
+                    context.ChatId,
+                    $"⚠️<b>Вы уже создали код доступа к этому ребёнку</b>\n\n" +
+                    "Поделитесь сущевствующим кодом либо нажмите кнопку ниже чтобы <i>отозвать его</i>",
+                    BotKeyboards.RecallTokenKeyboard(tokens[0].Id),
+                    ct);
+                
+                await userStateService.UpdateAsync<object>(context.ChatId, UserStateType.Idle, data: null, ct);
+                return new StepResult<ProvideAccessData>(UserStateType.Idle, null);
+            }
+            
             var child = children[0];
             var updatedData = data with { ChildId = child.Id, ChildName = child.Name };
 

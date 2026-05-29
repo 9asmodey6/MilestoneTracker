@@ -32,6 +32,7 @@ public static class UiConstants
         public const string FinishMediaUpload = "finish_media_upload";
         public const string ActionViewMilestones = "action_view_milestones";
         public const string ActionRecoverMilestones = "action_recover_milestones";
+        public const string RecallAccessTokenPrefix = "recall_access_token_";
 
         public static class GetChild
         {

@@ -10,6 +10,11 @@ using Microsoft.Extensions.Logging;
 
 public class ChildAccessTokenService(IAppDbContext dbContext, ILogger<ChildAccessTokenService> logger) : IChildAccessTokenService
 {
+    public async Task<List<ChildAccessToken>> GetChildAccessTokensAsync(int childId, CancellationToken ct = default)
+    {
+       return await dbContext.AccessTokens.Where(t => t.ChildId == childId).ToListAsync(ct);
+    }
+
     public async Task<Result<ChildAccessToken>> GenerateTokenAsync(int childId, int creatorId, int validityHours = 24,  CancellationToken ct = default)
     {
         var child = await dbContext.Children

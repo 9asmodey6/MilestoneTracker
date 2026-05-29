@@ -27,6 +27,16 @@ public static class BotKeyboards
         [new KeyboardButton(UiConstants.ReplyButtons.Help)]
     ]) { ResizeKeyboard = true };
 
+    public static InlineKeyboardMarkup RecallTokenKeyboard(Guid tokenId) => new InlineKeyboardMarkup(new[]
+    {
+        new[]
+        {
+            InlineKeyboardButton.WithCallbackData(
+                "◀️ Отозвать код доступа",
+                UiConstants.CallbackQueries.RecallAccessTokenPrefix + tokenId)
+        }
+    });
+
     public static InlineKeyboardMarkup SelectMilestoneActionKeyboard => new InlineKeyboardMarkup(new[]
     {
         new[]
@@ -112,7 +122,7 @@ public static class BotKeyboards
 
         return new InlineKeyboardMarkup(buttons.Chunk(1));
     }
-    
+
     public static InlineKeyboardMarkup ChildDeleteConfirmationKeyboard()
     {
         return new InlineKeyboardMarkup(new[]
@@ -393,23 +403,22 @@ public static class BotKeyboards
             }
         });
     }
-    
 
-public static InlineKeyboardMarkup MilestoneRecoveryConfirmationKeyboard()
-{
-    return new InlineKeyboardMarkup(new[]
+
+    public static InlineKeyboardMarkup MilestoneRecoveryConfirmationKeyboard()
     {
-        new[]
+        return new InlineKeyboardMarkup(new[]
         {
-            InlineKeyboardButton.WithCallbackData("✅ Восстановить",
-                UiConstants.CallbackQueries.RecoverMilestone.Confirm)
-        },
-        new[]
-        {
-            InlineKeyboardButton.WithCallbackData("❌ Отменить",
-                "/cancel")
-        }
-    });
-}
-
+            new[]
+            {
+                InlineKeyboardButton.WithCallbackData("✅ Восстановить",
+                    UiConstants.CallbackQueries.RecoverMilestone.Confirm)
+            },
+            new[]
+            {
+                InlineKeyboardButton.WithCallbackData("❌ Отменить",
+                    "/cancel")
+            }
+        });
+    }
 }
