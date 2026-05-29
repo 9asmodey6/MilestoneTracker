@@ -50,8 +50,8 @@ public class ChildProvideStepHandler(
                     "Поделитесь сущевствующим кодом либо нажмите кнопку ниже чтобы <i>отозвать его</i>",
                     BotKeyboards.RecallTokenKeyboard(tokens[0].Id),
                     ct);
-                
-                await userStateService.UpdateAsync<object>(context.ChatId, UserStateType.Idle, data: null, ct);
+
+                await userStateService.ResetAsync(context.ChatId, ct);
                 return new StepResult<ProvideAccessData>(UserStateType.Idle, null);
             }
             
