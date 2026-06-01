@@ -3,6 +3,7 @@ using MilestoneTracker.Application;
 using MilestoneTracker.Infrastructure;
 using Serilog;
 using MilestoneTracker.API.Extensions;
+using MilestoneTracker.API.Middlewares;
 using MilestoneTracker.Infrastructure.Options;
 using Telegram.Bot;
 
@@ -17,7 +18,13 @@ builder.Services.ApplyConfigurations(builder.Configuration)
     .AddInfractructure(builder.Configuration)
     .AddApplication()
     .AddSerilogLogging()
-    .AddAppHealthChecks();
+    .AddAppHealthChecks()
+    .AddMemoryCache();
+
+    // Rate Limits
+builder.Services.AddTransient<UserIdEnrichmentMiddleware>();
+builder.Services.AddLimiter();
+
 
 
 var app = builder.Build();
@@ -40,6 +47,9 @@ if (app.Environment.IsDevelopment())
 app.MapHealthChecks("/health");
 
 app.UseHangfireRecurringJobs();
+
+app.UseMiddleware<UserIdEnrichmentMiddleware>();
+app.UseRateLimiter();
 
 app.MapControllers();
 app.Run();

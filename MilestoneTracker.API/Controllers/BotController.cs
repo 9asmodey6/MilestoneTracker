@@ -4,10 +4,12 @@ using Microsoft.AspNetCore.Mvc;
 using Telegram.Bot.Types;
 using Infrastructure.Services;
 using System.Text.Json;
-
+using Application.Common.Constants;
+using Microsoft.AspNetCore.RateLimiting;
 
 [ApiController]
-[Route("api/bot")]
+[EnableRateLimiting(PoliciesConstants.RateLimiterPolicies.TelegramBotPolicy)]
+[Route(EndpointConstants.TelegramBotRoute)]
 public class WebhookController(ILogger<WebhookController> logger) : ControllerBase
 {
     [HttpPost]
